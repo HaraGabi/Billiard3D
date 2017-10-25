@@ -23,5 +23,12 @@ namespace Billiard3D.Track
             var goodForZ = z >= Corners.Min(vector => vector.Z) && z <= Corners.Max(vector => vector.Z);
             return goodForX && goodForY && goodForZ;
         }
+
+        public Vector3D AngleAfterHit(Vector3D hitPoint)
+        {
+            if (!WasHit(hitPoint))
+                throw new ArgumentException("Collision not detected!");
+            throw new NotImplementedException();
+        }
     }
 }
