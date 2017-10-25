@@ -28,6 +28,8 @@ namespace Billiard3D.Track
         {
             if (!WasHit(hitPoint))
                 throw new ArgumentException("Collision not detected!");
+            var list = new List<double>();
+            Corners.ForEach(x => list.Add(Vector3D.Angle(x, hitPoint))); // nope not working
             throw new NotImplementedException();
         }
     }

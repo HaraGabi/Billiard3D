@@ -106,5 +106,17 @@ namespace Billiard3D.Math
         public static bool operator ==(Vector3D lValue, Vector3D rValue) => (lValue != null) && lValue.Equals(rValue);
 
         public static bool operator !=(Vector3D lValue, Vector3D rValue) => (lValue != null) && lValue.Equals(rValue);
+
+        public static double Angle(Vector3D lValue, Vector3D rValue)
+        {
+            var absL = AbsoluteValue(lValue);
+            var absR = AbsoluteValue(rValue);
+            return Acos(((lValue * rValue) / (absR * absL)).ToRadian());
+        }
+    }
+
+    public static class DoubleExtensions
+    {
+        public static double ToRadian(this double degree) => PI * degree / 180.0;
     }
 }
