@@ -111,7 +111,7 @@ namespace Billiard3D.Math
         {
             var absL = AbsoluteValue(lValue);
             var absR = AbsoluteValue(rValue);
-            return Acos(((lValue * rValue) / (absR * absL)).ToRadian());
+            return Acos((lValue * rValue / (absR * absL)).ToRadian());
         }
     }
 
