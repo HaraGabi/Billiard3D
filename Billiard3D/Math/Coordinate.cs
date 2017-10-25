@@ -9,6 +9,26 @@ namespace Billiard3D.Math
 
     public class Coordinate : IEnumerable<double>, IEquatable<Coordinate>, IEqualityComparer<Coordinate>
     {
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            return (obj.GetType() == GetType()) && Equals((Coordinate)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = X.GetHashCode();
+                hashCode = (hashCode * 397) ^ Y.GetHashCode();
+                hashCode = (hashCode * 397) ^ Z.GetHashCode();
+                return hashCode;
+            }
+        }
+
         public double X { get; }
         public double Y { get; }
         public double Z { get; }
@@ -39,7 +59,7 @@ namespace Billiard3D.Math
 
         public bool Equals(Coordinate x, Coordinate y) => x.Equals(y);
 
-        public int GetHashCode(Coordinate obj) => X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode();
+        public int GetHashCode(Coordinate obj) => obj.GetHashCode();
 
         public double this[int index]
         {
@@ -54,5 +74,9 @@ namespace Billiard3D.Math
                 }
             }
         }
+
+        public static bool operator ==(Coordinate lValue, Coordinate rValue) => (lValue != null) && lValue.Equals(rValue);
+
+        public static bool operator !=(Coordinate lValue, Coordinate rValue) => (lValue == null) || !lValue.Equals(rValue);
     }
 }
