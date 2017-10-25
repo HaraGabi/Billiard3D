@@ -7,7 +7,7 @@ using System.Linq;
 namespace Billiard3D.Math
 {
 
-    public class Coordinate : IEnumerable<double>, IEquatable<Coordinate>, IEqualityComparer<Coordinate>
+    public class Coordinate : IEnumerable<double>, IEquatable<Coordinate>
     {
         public override bool Equals(object obj)
         {
@@ -56,10 +56,6 @@ namespace Billiard3D.Math
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public bool Equals(Coordinate other) => this.SequenceEqual(other);
-
-        public bool Equals(Coordinate x, Coordinate y) => x.Equals(y);
-
-        public int GetHashCode(Coordinate obj) => obj.GetHashCode();
 
         public double this[int index]
         {
