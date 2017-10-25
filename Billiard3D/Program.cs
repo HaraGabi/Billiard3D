@@ -1,10 +1,12 @@
 ﻿using System;
+using Billiard3D.Math;
+using Billiard3D.Track;
 
 namespace Billiard3D
 {
-    using Billiard3D.Math;
-    using Billiard3D.Track;
+    using JetBrains.Annotations;
 
+    [UsedImplicitly]
     public class Program
     {
         public static void Main(string[] args)
