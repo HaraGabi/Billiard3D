@@ -113,6 +113,14 @@ namespace Billiard3D.Math
             var absR = AbsoluteValue(rValue);
             return Acos((lValue * rValue / (absR * absL)).ToRadian());
         }
+
+        public static Vector3D Vektorial(Vector3D left, Vector3D right)
+        {
+            var a = (left.Y * right.Z) - (left.Z * right.Y);
+            var b = (left.Z * right.X) - (left.X * right.Z);
+            var c = (left.X * right.Y) - (left.Y * right.X);
+            return (a, b, c);
+        }
     }
 
     public static class DoubleExtensions

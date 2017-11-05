@@ -9,20 +9,27 @@ namespace Billiard3D.Track
     internal class Wall
     {
         public List<Vector3D> Corners { get; set; } = new List<Vector3D>();
+        public Vector3D NormalVector { get; set; }
 
         public Wall(ICollection<Vector3D> corners)
         {
             Corners.AddRange(corners);
+            NormalVector = Vector3D.Vektorial(Corners[1] - Corners[0], Corners[2]-Corners[0]);
+            if (!Equation(Corners.Last()))
+            {
+                throw new ArgumentException();
+            }
         }
 
-        public bool WasHit(Vector3D hitPoint)
+        private bool Equation((double x, double y, double z) tup)
         {
-            var (x, y, z) = hitPoint;
-            var goodForX = x >= Corners.Min(vector => vector.X) && x <= Corners.Max(vector => vector.X);
-            var goodForY = y >= Corners.Min(vector => vector.Y) && y <= Corners.Max(vector => vector.Y);
-            var goodForZ = z >= Corners.Min(vector => vector.Z) && z <= Corners.Max(vector => vector.Z);
-            return goodForX && goodForY && goodForZ;
+            double confidende = 0.000001;
+            return NormalVector.X * (tup.x - Corners[0].X) + NormalVector.Y * (tup.y - Corners[0].Y) + NormalVector.Z * (tup.z - Corners[0].Z) >= confidende;
         }
+
+        public double NormalEquation(Vector3D tuple) => NormalVector * (Corners.First() - tuple);
+
+        public bool WasHit(Vector3D hitPoint) => Equation(hitPoint);
 
         public Vector3D AngleAfterHit(Vector3D hitPoint)
         {

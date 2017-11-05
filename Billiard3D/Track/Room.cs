@@ -14,7 +14,7 @@ namespace Billiard3D.Track
         public Room(List<Vector3D> corners)
         {
             if (corners.Count != 8)
-                throw new ArgumentException($"Not enough points to constructs a room {nameof(corners)}");
+                throw new ArgumentException($"Not enough points to constructs a room {nameof(corners)}"); 
             Corners.AddRange(corners);
             _roomLenght = Corners.Max(x => x.X) - Corners.Min(x => x.X);
             _roomWidth = Corners.Max(x => x.Y) - Corners.Min(x => x.Y);
