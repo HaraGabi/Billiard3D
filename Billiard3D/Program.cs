@@ -11,10 +11,10 @@ namespace Billiard3D
     {
         public static void Main(string[] args) 
         {
-            var points = new[] { new Vector3D(0, 0, 0), new Vector3D(2, 0, 0), new Vector3D(0, 2, 0), new Vector3D(2, 2, 0) };
+            var points = new[] { new Vector3D(1, 0, 0), new Vector3D(3, 0, 0), new Vector3D(0, 3, 0), new Vector3D(3, 3, 0) };
             var fal = new Wall(points);
             Console.WriteLine(fal.WasHit(new Vector3D(1, 1, 0)));
-            fal.AngleAfterHit(new Vector3D(1, 1, 0));
+            fal.AngleAfterHit((1, 1, 0), (0, 0, 4));
             Console.ReadKey();
         }
     }

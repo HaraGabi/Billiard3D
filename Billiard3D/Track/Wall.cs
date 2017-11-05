@@ -34,10 +34,12 @@ namespace Billiard3D.Track
 
         public bool WasHit(Vector3D hitPoint) => CheckIfPointIsOnThePlain(hitPoint);
 
-        public Vector3D AngleAfterHit(Vector3D hitPoint)
+        public Vector3D AngleAfterHit(Vector3D hitPoint, Vector3D velocity)
         {
             if (!WasHit(hitPoint))
                 throw new ArgumentException("Collision not detected!");
+            var angle = Vector3D.Angle(NormalVector, hitPoint).ToDegree();
+            var velAngle = Vector3D.Angle(NormalVector, velocity).ToDegree();
             return null;
         }
     }

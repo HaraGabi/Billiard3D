@@ -56,7 +56,7 @@ namespace Billiard3D.Math
 
         public static double AbsoluteValue(Vector3D vector)
         {
-            var squred = vector.Aggregate((sum, x) => sum + x * x);
+            var squred = vector.Select(x => x* x).Aggregate((sum, x) => sum + x);
             return Sqrt(squred);
         }
 
@@ -111,7 +111,7 @@ namespace Billiard3D.Math
         {
             var absL = AbsoluteValue(lValue);
             var absR = AbsoluteValue(rValue);
-            return Acos((lValue * rValue / (absR * absL)).ToRadian());
+            return Acos((lValue * rValue / (absR * absL)));
         }
 
         public static Vector3D Vectorial(Vector3D left, Vector3D right)
@@ -125,6 +125,8 @@ namespace Billiard3D.Math
 
     public static class DoubleExtensions
     {
-        public static double ToRadian(this double degree) => PI * degree / 180.0;
+        public static double ToRadian(this double degree) => (PI * degree) / 180.0;
+
+        public static double ToDegree(this double radian) => radian * (180.0 / PI);
     }
 }
