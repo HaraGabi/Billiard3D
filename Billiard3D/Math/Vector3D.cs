@@ -54,6 +54,8 @@ namespace Billiard3D.Math
             z = Z;
         }
 
+        public (Vector3D xDir, Vector3D yDir, Vector3D zDir) GetDirectionVectors() => ((X, 0, 0), (0, Y, 0), (0, 0, Z));
+
         public static double AbsoluteValue(Vector3D vector)
         {
             var squred = vector.Select(x => x* x).Aggregate((sum, x) => sum + x);
@@ -109,6 +111,10 @@ namespace Billiard3D.Math
 
         public static double Angle(Vector3D lValue, Vector3D rValue)
         {
+            if (IsNullVector(lValue) || IsNullVector(lValue))
+            {
+                return 90.0.ToRadian();
+            }
             var absL = AbsoluteValue(lValue);
             var absR = AbsoluteValue(rValue);
             return Acos((lValue * rValue / (absR * absL)));
@@ -121,6 +127,8 @@ namespace Billiard3D.Math
             var c = (left.X * right.Y) - (left.Y * right.X);
             return (a, b, c);
         }
+
+        public static bool IsNullVector(Vector3D vector) => vector.All(x => Abs(x) <= double.Epsilon);
     }
 
     public static class DoubleExtensions

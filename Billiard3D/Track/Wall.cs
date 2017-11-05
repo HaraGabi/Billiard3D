@@ -40,6 +40,10 @@ namespace Billiard3D.Track
                 throw new ArgumentException("Collision not detected!");
             var angle = Vector3D.Angle(NormalVector, hitPoint).ToDegree();
             var velAngle = Vector3D.Angle(NormalVector, velocity).ToDegree();
+            var dirs = velocity.GetDirectionVectors();
+            var xAngle = Vector3D.Angle(dirs.xDir, NormalVector).ToDegree();
+            var yAngle = Vector3D.Angle(dirs.yDir, NormalVector).ToDegree();
+            var zAngle = Vector3D.Angle(dirs.zDir, NormalVector).ToDegree();
             return null;
         }
     }
