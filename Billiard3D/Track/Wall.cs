@@ -14,30 +14,31 @@ namespace Billiard3D.Track
         public Wall(ICollection<Vector3D> corners)
         {
             Corners.AddRange(corners);
-            NormalVector = Vector3D.Vektorial(Corners[1] - Corners[0], Corners[2]-Corners[0]);
-            if (!Equation(Corners.Last()))
+            NormalVector = Vector3D.Vectorial(Corners[1] - Corners[0], Corners[2]-Corners[0]);
+            if (!CheckIfPointIsOnThePlain(Corners.Last()))
             {
                 throw new ArgumentException();
             }
         }
 
-        private bool Equation((double x, double y, double z) tup)
+        private bool CheckIfPointIsOnThePlain((double x, double y, double z) point)
         {
             double confidende = 0.000001;
-            return NormalVector.X * (tup.x - Corners[0].X) + NormalVector.Y * (tup.y - Corners[0].Y) + NormalVector.Z * (tup.z - Corners[0].Z) >= confidende;
+            double forX = NormalVector.X * (point.x - Corners.First().X);
+            double forY = NormalVector.Y * (point.y - Corners.First().Y);
+            double forZ = NormalVector.Z * (point.z - Corners.First().Z);
+            return forX + forY + forZ <= confidende;
         }
 
         public double NormalEquation(Vector3D tuple) => NormalVector * (Corners.First() - tuple);
 
-        public bool WasHit(Vector3D hitPoint) => Equation(hitPoint);
+        public bool WasHit(Vector3D hitPoint) => CheckIfPointIsOnThePlain(hitPoint);
 
         public Vector3D AngleAfterHit(Vector3D hitPoint)
         {
             if (!WasHit(hitPoint))
                 throw new ArgumentException("Collision not detected!");
-            var list = new List<double>();
-            Corners.ForEach(x => list.Add(Vector3D.Angle(x, hitPoint))); // nope not working
-            throw new NotImplementedException();
+            return null;
         }
     }
 }

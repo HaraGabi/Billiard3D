@@ -6,18 +6,18 @@ using static System.Math;
 
 namespace Billiard3D.Math
 {
-    internal class Vector3D : IEnumerable<int>, IComparable<Vector3D>, IEquatable<Vector3D>
+    internal class Vector3D : IEnumerable<double>, IComparable<Vector3D>, IEquatable<Vector3D>
     {
-        public Vector3D(int x, int y, int z)
+        public Vector3D(double x, double y, double z)
         {
             X = x;
             Y = y;
             Z = z;
         }
 
-        public Vector3D(IEnumerable<int> coll)
+        public Vector3D(IEnumerable<double> coll)
         {
-            var ints = coll as int[] ?? coll.ToArray();
+            var ints = coll as double[] ?? coll.ToArray();
             if (ints.Length != 3)
                 throw new ArgumentException("This vector class only support 3D vectors");
             X = ints[0];
@@ -25,9 +25,9 @@ namespace Billiard3D.Math
             Z = ints[2];
         }
 
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Z { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Z { get; set; }
 
         public int CompareTo(Vector3D other)
         {
@@ -36,7 +36,7 @@ namespace Billiard3D.Math
             return AbsoluteValue(other) < AbsoluteValue(this) ? 1 : 0;
         }
 
-        public IEnumerator<int> GetEnumerator()
+        public IEnumerator<double> GetEnumerator()
         {
             yield return X;
             yield return Y;
@@ -47,7 +47,7 @@ namespace Billiard3D.Math
 
         public bool Equals(Vector3D other) => this.SequenceEqual(other);
 
-        public void Deconstruct(out int x, out int y, out int z)
+        public void Deconstruct(out double x, out double y, out double z)
         {
             x = X;
             y = Y;
@@ -98,10 +98,10 @@ namespace Billiard3D.Math
 
         public static Vector3D operator *(int lValue, Vector3D rValue) => rValue * lValue;
 
-        public static implicit operator Vector3D((int x, int y, int z) tuple) =>
+        public static implicit operator Vector3D((double x, double y, double z) tuple) =>
             new Vector3D(tuple.x, tuple.y, tuple.z);
 
-        public static implicit operator (int x, int y, int z)(Vector3D vector) => (vector.X, vector.Y, vector.Z);
+        public static implicit operator (double x, double y, double z)(Vector3D vector) => (vector.X, vector.Y, vector.Z);
 
         public static bool operator ==(Vector3D lValue, Vector3D rValue) => (lValue != null) && lValue.Equals(rValue);
 
@@ -114,7 +114,7 @@ namespace Billiard3D.Math
             return Acos((lValue * rValue / (absR * absL)).ToRadian());
         }
 
-        public static Vector3D Vektorial(Vector3D left, Vector3D right)
+        public static Vector3D Vectorial(Vector3D left, Vector3D right)
         {
             var a = (left.Y * right.Z) - (left.Z * right.Y);
             var b = (left.Z * right.X) - (left.X * right.Z);
