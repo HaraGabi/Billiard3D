@@ -17,11 +17,9 @@ namespace Billiard3D.Track
         public Wall(ICollection<Vector3D> corners)
         {
             Corners.AddRange(corners);
-            NormalVector = Vector3D.Vectorial(Corners[1] - Corners[0], Corners[2]-Corners[0]).Normalize();
+            NormalVector = Vectorial(Corners[1] - Corners[0], Corners[2]-Corners[0]).Normalize();
             if (!CheckIfPointIsOnThePlain(Corners.Last()))
-            {
                 throw new ArgumentException();
-            }
         }
 
         private bool CheckIfPointIsOnThePlain((double x, double y, double z) point)
@@ -33,22 +31,27 @@ namespace Billiard3D.Track
             return forX + forY + forZ <= confidende;
         }
 
-        public double NormalEquation(Vector3D tuple) => NormalVector * (Corners.First() - tuple);
+        public double NormalEquation(Vector3D tuple)
+        {
+            var vec = (Corners.First() - tuple);
+            var val = NormalVector * vec;
+            return val;
+        }
 
         public bool WasHit(Vector3D hitPoint) => CheckIfPointIsOnThePlain(hitPoint);
 
         public Vector3D AngleAfterHit(Vector3D hitPoint, Vector3D velocity)
         {
             var normalVel = velocity.Normalize();
-            if (!WasHit(hitPoint))
-                throw new ArgumentException("Collision not detected!");
+            //if (!WasHit(hitPoint))
+                //throw new ArgumentException("Collision not detected!");
             HittedPoints.Add(hitPoint);
             Vector3D ret = 2 * ((-1 * normalVel) * NormalVector) * NormalVector + normalVel;
             double first = Angle(velocity, NormalVector);
             first = first > PI / 2 ? Abs(first - PI) : first; 
             double second = Angle(ret, NormalVector);
             second = second > PI / 2 ? Abs(second - PI) : second;
-            if (Sin(first) - Sin(second) > double.Epsilon)
+            if (Sin(first) - Sin(second) > 0.0005)
                 throw new InvalidOperationException($"incoming {first.ToDegree()} going out {second.ToDegree()}");
             return ret;
         }

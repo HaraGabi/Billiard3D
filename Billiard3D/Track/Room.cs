@@ -20,10 +20,10 @@ namespace Billiard3D.Track
         {
             for (int i = 0; i < NumberOfIterations; ++i)
             {
-                var hittedWall = Walls.OrderBy(x => x.NormalEquation(initialPoint)).Last(x => x.NormalEquation(initialPoint) >= 0);
-                initialVel = hittedWall.AngleAfterHit(initialPoint + hittedWall.NormalEquation(initialPoint) * initialVel, initialVel);
+                var hittedWall = Walls.OrderBy(x => x.NormalEquation(initialPoint)).First();
+                initialPoint += System.Math.Abs(hittedWall.NormalEquation(initialPoint)) * initialVel;
+                initialVel = hittedWall.AngleAfterHit(initialPoint, initialVel);
             }
-            int a = 3;
         }
     }
 }
