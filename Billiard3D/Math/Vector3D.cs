@@ -100,6 +100,22 @@ namespace Billiard3D.Math
 
         public static Vector3D operator *(int lValue, Vector3D rValue) => rValue * lValue;
 
+        public static Vector3D operator *(double lValue, Vector3D rValue)
+        {
+            var mult = rValue.Select(x => x * lValue);
+            return new Vector3D(mult);
+        }
+
+        public static Vector3D operator /(Vector3D lValue, double rValue)
+        {
+            var div = lValue.Select(x => x / rValue);
+            return new Vector3D(div);
+        }
+
+        public static Vector3D operator /(double lValue, Vector3D rValue) => rValue / lValue;
+
+        public static Vector3D operator *(Vector3D lValue, double rValue) => rValue * lValue;
+
         public static implicit operator Vector3D((double x, double y, double z) tuple) =>
             new Vector3D(tuple.x, tuple.y, tuple.z);
 
@@ -129,6 +145,8 @@ namespace Billiard3D.Math
         }
 
         public static bool IsNullVector(Vector3D vector) => vector.All(x => Abs(x) <= double.Epsilon);
+
+        public Vector3D Normalize() => this / AbsoluteValue(this);
     }
 
     public static class DoubleExtensions

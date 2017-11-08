@@ -14,7 +14,7 @@ namespace Billiard3D.Track
         public Wall(ICollection<Vector3D> corners)
         {
             Corners.AddRange(corners);
-            NormalVector = Vector3D.Vectorial(Corners[1] - Corners[0], Corners[2]-Corners[0]);
+            NormalVector = Vector3D.Vectorial(Corners[1] - Corners[0], Corners[2]-Corners[0]).Normalize();
             if (!CheckIfPointIsOnThePlain(Corners.Last()))
             {
                 throw new ArgumentException();
@@ -36,15 +36,17 @@ namespace Billiard3D.Track
 
         public Vector3D AngleAfterHit(Vector3D hitPoint, Vector3D velocity)
         {
+            var normalVel = velocity.Normalize();
             if (!WasHit(hitPoint))
                 throw new ArgumentException("Collision not detected!");
-            var angle = Vector3D.Angle(NormalVector, hitPoint).ToDegree();
-            var velAngle = Vector3D.Angle(NormalVector, velocity).ToDegree();
-            var dirs = velocity.GetDirectionVectors();
-            var xAngle = Vector3D.Angle(dirs.xDir, NormalVector).ToDegree();
-            var yAngle = Vector3D.Angle(dirs.yDir, NormalVector).ToDegree();
-            var zAngle = Vector3D.Angle(dirs.zDir, NormalVector).ToDegree();
-            return null;
+            Vector3D ret = 2 * ((-1 * normalVel) * NormalVector) * NormalVector + normalVel;
+            double first = Vector3D.Angle(velocity, NormalVector);
+            double second = Vector3D.Angle(ret, NormalVector);
+            if (System.Math.Sin(first) - System.Math.Sin(second) > double.Epsilon)
+            {
+                throw new InvalidOperationException($"incoming {first.ToDegree()} going out {second.ToDegree()}");
+            }
+            return ret;
         }
     }
 }

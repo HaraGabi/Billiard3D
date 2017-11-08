@@ -11,28 +11,24 @@ namespace Billiard3D.Track
         private readonly double _roomLenght;
         private readonly double _roomWidth;
 
-        public Room(List<Vector3D> corners)
+        public IEnumerable<Wall> Walls { get; set; }
+
+        public int NumberOfIterations { get; set; } = 10_000;
+
+        public Room(IEnumerable<Wall> walls)
         {
-            if (corners.Count != 8)
-                throw new ArgumentException($"Not enough points to constructs a room {nameof(corners)}"); 
-            Corners.AddRange(corners);
-            _roomLenght = Corners.Max(x => x.X) - Corners.Min(x => x.X);
-            _roomWidth = Corners.Max(x => x.Y) - Corners.Min(x => x.Y);
-            _roomHeight = Corners.Max(x => x.Z) - Corners.Min(x => x.Z);
+            Walls = walls;
         }
 
-        public List<Vector3D> Corners { get; set; } = new List<Vector3D>();
-
-        public void StartSimulation(Vector3D startingPoint, Vector3D startingDirection)
+        public void StartSimulation(Vector3D initialPoint, Vector3D initialVel)
         {
-            var actualPosition = startingDirection + startingDirection;
-            while (InRoom(actualPosition))
+            Vector3D currentPoint = initialPoint;
+            var currentVel = initialVel;
+            for (int i = 0; i < NumberOfIterations; ++i)
             {
-                actualPosition += startingDirection;
+                currentPoint += currentVel;
+
             }
         }
-
-        private bool InRoom(Vector3D vector) =>
-            (vector.X < _roomLenght) && (vector.Y < _roomWidth) && (vector.Z < _roomHeight);
     }
 }
