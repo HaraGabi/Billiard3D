@@ -19,6 +19,7 @@ namespace Billiard3D
             var talaj = new Wall(new Vector3D[] { (0, 0, 0), (0, 3, 0), (3, 3, 0), (3, 0, 0) });
             var szoba = new Room(new Wall[] { jobbFal, balFal, hátFal, szembeFal, tető, talaj });
             szoba.StartSimulation((1.5, 0, 0), (2, 1, 1.4));
+
             Console.ReadKey();
         }
     }

@@ -12,6 +12,7 @@ namespace Billiard3D.Track
     {
         public List<Vector3D> Corners { get; set; } = new List<Vector3D>();
         public Vector3D NormalVector { get; set; }
+        public List<Vector3D> HittedPoints { get; set; } = new List<Vector3D>();
 
         public Wall(ICollection<Vector3D> corners)
         {
@@ -41,15 +42,14 @@ namespace Billiard3D.Track
             var normalVel = velocity.Normalize();
             if (!WasHit(hitPoint))
                 throw new ArgumentException("Collision not detected!");
+            HittedPoints.Add(hitPoint);
             Vector3D ret = 2 * ((-1 * normalVel) * NormalVector) * NormalVector + normalVel;
             double first = Angle(velocity, NormalVector);
             first = first > PI / 2 ? Abs(first - PI) : first; 
             double second = Angle(ret, NormalVector);
             second = second > PI / 2 ? Abs(second - PI) : second;
             if (Sin(first) - Sin(second) > double.Epsilon)
-            {
                 throw new InvalidOperationException($"incoming {first.ToDegree()} going out {second.ToDegree()}");
-            }
             return ret;
         }
     }
