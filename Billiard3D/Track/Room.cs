@@ -7,10 +7,6 @@ namespace Billiard3D.Track
 {
     internal class Room
     {
-        private readonly double _roomHeight;
-        private readonly double _roomLenght;
-        private readonly double _roomWidth;
-
         public IEnumerable<Wall> Walls { get; set; }
 
         public int NumberOfIterations { get; set; } = 10_000;
@@ -22,13 +18,12 @@ namespace Billiard3D.Track
 
         public void StartSimulation(Vector3D initialPoint, Vector3D initialVel)
         {
-            Vector3D currentPoint = initialPoint;
-            var currentVel = initialVel;
             for (int i = 0; i < NumberOfIterations; ++i)
             {
-                currentPoint += currentVel;
-
+                var hittedWall = Walls.OrderBy(x => x.NormalEquation(initialPoint)).Last(x => x.NormalEquation(initialPoint) >= 0);
+                initialVel = hittedWall.AngleAfterHit(initialPoint + hittedWall.NormalEquation(initialPoint) * initialVel, initialVel);
             }
+            int a = 3;
         }
     }
 }

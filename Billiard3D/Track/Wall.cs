@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using Billiard3D.Math;
 using System.Linq;
+using static System.Math;
+using static Billiard3D.Math.Vector3D;
 
 namespace Billiard3D.Track
 {
@@ -23,7 +25,7 @@ namespace Billiard3D.Track
 
         private bool CheckIfPointIsOnThePlain((double x, double y, double z) point)
         {
-            double confidende = 0.000001;
+            const double confidende = 0.000001;
             double forX = NormalVector.X * (point.x - Corners.First().X);
             double forY = NormalVector.Y * (point.y - Corners.First().Y);
             double forZ = NormalVector.Z * (point.z - Corners.First().Z);
@@ -40,9 +42,11 @@ namespace Billiard3D.Track
             if (!WasHit(hitPoint))
                 throw new ArgumentException("Collision not detected!");
             Vector3D ret = 2 * ((-1 * normalVel) * NormalVector) * NormalVector + normalVel;
-            double first = Vector3D.Angle(velocity, NormalVector);
-            double second = Vector3D.Angle(ret, NormalVector);
-            if (System.Math.Sin(first) - System.Math.Sin(second) > double.Epsilon)
+            double first = Angle(velocity, NormalVector);
+            first = first > PI / 2 ? Abs(first - PI) : first; 
+            double second = Angle(ret, NormalVector);
+            second = second > PI / 2 ? Abs(second - PI) : second;
+            if (Sin(first) - Sin(second) > double.Epsilon)
             {
                 throw new InvalidOperationException($"incoming {first.ToDegree()} going out {second.ToDegree()}");
             }
