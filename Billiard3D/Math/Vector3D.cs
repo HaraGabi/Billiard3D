@@ -58,7 +58,7 @@ namespace Billiard3D.Math
 
         public static double AbsoluteValue(Vector3D vector)
         {
-            var squred = vector.Select(x => x* x).Aggregate((sum, x) => sum + x);
+            var squred = vector.Select(x => x * x).Aggregate((sum, x) => sum + x);
             return Sqrt(squred);
         }
 
@@ -119,7 +119,8 @@ namespace Billiard3D.Math
         public static implicit operator Vector3D((double x, double y, double z) tuple) =>
             new Vector3D(tuple.x, tuple.y, tuple.z);
 
-        public static implicit operator (double x, double y, double z)(Vector3D vector) => (vector.X, vector.Y, vector.Z);
+        public static implicit operator (double x, double y, double z)(Vector3D vector) =>
+            (vector.X, vector.Y, vector.Z);
 
         public static bool operator ==(Vector3D lValue, Vector3D rValue) => (lValue != null) && lValue.Equals(rValue);
 
@@ -128,19 +129,17 @@ namespace Billiard3D.Math
         public static double Angle(Vector3D lValue, Vector3D rValue)
         {
             if (IsNullVector(lValue) || IsNullVector(lValue))
-            {
                 return 90.0.ToRadian();
-            }
             var absL = AbsoluteValue(lValue);
             var absR = AbsoluteValue(rValue);
-            return Acos((lValue * rValue / (absR * absL)));
+            return Acos(lValue * rValue / (absR * absL));
         }
 
         public static Vector3D Vectorial(Vector3D left, Vector3D right)
         {
-            var a = (left.Y * right.Z) - (left.Z * right.Y);
-            var b = (left.Z * right.X) - (left.X * right.Z);
-            var c = (left.X * right.Y) - (left.Y * right.X);
+            var a = left.Y * right.Z - left.Z * right.Y;
+            var b = left.Z * right.X - left.X * right.Z;
+            var c = left.X * right.Y - left.Y * right.X;
             return (a, b, c);
         }
 
@@ -151,7 +150,7 @@ namespace Billiard3D.Math
 
     public static class DoubleExtensions
     {
-        public static double ToRadian(this double degree) => (PI * degree) / 180.0;
+        public static double ToRadian(this double degree) => PI * degree / 180.0;
 
         public static double ToDegree(this double radian) => radian * (180.0 / PI);
     }
