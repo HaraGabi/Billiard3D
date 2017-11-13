@@ -4,9 +4,11 @@ using System.Linq;
 using Billiard3D.Math;
 using static System.Math;
 using static Billiard3D.Math.Vector3D;
+using System.Diagnostics;
 
 namespace Billiard3D.Track
 {
+    [DebuggerDisplay("({NormalVector.X}, {NormalVector.Y}, {NormalVector.Z})")]
     internal class Wall
     {
         public Wall(IEnumerable<Vector3D> corners)
@@ -46,7 +48,7 @@ namespace Billiard3D.Track
         {
             var normalVel = velocity.Normalize();
             //if (!WasHit(hitPoint))
-            //  throw new ArgumentException("Collision not detected!");
+              //throw new ArgumentException("Collision not detected!");
             HittedPoints.Add(hitPoint);
             var ret = 2 * (-1 * normalVel * NormalVector) * NormalVector + normalVel;
             var first = Angle(velocity, NormalVector);

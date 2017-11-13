@@ -122,9 +122,19 @@ namespace Billiard3D.Math
         public static implicit operator (double x, double y, double z)(Vector3D vector) =>
             (vector.X, vector.Y, vector.Z);
 
-        public static bool operator ==(Vector3D lValue, Vector3D rValue) => (lValue != null) && lValue.Equals(rValue);
+        public static bool operator ==(Vector3D lValue, Vector3D rValue)
+        {
+            if (lValue is null)
+                return false;
+            return lValue.Equals(rValue);
+        }
 
-        public static bool operator !=(Vector3D lValue, Vector3D rValue) => (lValue != null) && lValue.Equals(rValue);
+        public static bool operator !=(Vector3D lValue, Vector3D rValue)
+        {
+            if (lValue is null)
+                return false;
+            return !lValue.Equals(rValue);
+        }
 
         public static double Angle(Vector3D lValue, Vector3D rValue)
         {
