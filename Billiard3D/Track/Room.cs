@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
-using Billiard3D.Math;
+using Billiard3D.VectorMath;
 
 namespace Billiard3D.Track
 {

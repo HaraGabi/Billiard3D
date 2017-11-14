@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Billiard3D.Math;
+using Billiard3D.VectorMath;
 using static System.Math;
-using static Billiard3D.Math.Vector3D;
+using static Billiard3D.VectorMath.Vector3D;
 using System.Diagnostics;
 
 namespace Billiard3D.Track

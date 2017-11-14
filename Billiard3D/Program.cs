@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Billiard3D.Math;
+using Billiard3D.VectorMath;
 using Billiard3D.Track;
 using ImageSharp;
 using JetBrains.Annotations;

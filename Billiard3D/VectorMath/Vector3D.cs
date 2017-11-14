@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static System.Math;
 
-namespace Billiard3D.Math
+namespace Billiard3D.VectorMath
 {
     internal class Vector3D : IEnumerable<double>, IComparable<Vector3D>, IEquatable<Vector3D>
     {
