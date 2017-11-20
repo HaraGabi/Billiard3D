@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Billiard3D.VectorMath;
 using static System.Math;
 using static Billiard3D.VectorMath.Vector3D;
-using System.Diagnostics;
 
 namespace Billiard3D.Track
 {
@@ -14,7 +14,7 @@ namespace Billiard3D.Track
         public Wall(IEnumerable<Vector3D> corners)
         {
             Corners.AddRange(corners);
-            NormalVector = Vectorial(Corners[1] - Corners[0], Corners[2] - Corners[0]).Normalize();
+            NormalVector = CrossProduct(Corners[1] - Corners[0], Corners[2] - Corners[0]).Normalize();
             if (!CheckIfPointIsOnThePlain(Corners.Last()))
                 throw new ArgumentException();
         }
@@ -25,11 +25,11 @@ namespace Billiard3D.Track
 
         private bool CheckIfPointIsOnThePlain((double x, double y, double z) point)
         {
-            const double confidende = 0.000001;
+            const double confidence = 0.000001;
             var forX = NormalVector.X * (point.x - Corners.First().X);
             var forY = NormalVector.Y * (point.y - Corners.First().Y);
             var forZ = NormalVector.Z * (point.z - Corners.First().Z);
-            return forX + forY + forZ <= confidende;
+            return forX + forY + forZ <= confidence;
         }
 
         public double NormalEquation(Vector3D tuple)
@@ -48,7 +48,7 @@ namespace Billiard3D.Track
         {
             var normalVel = velocity.Normalize();
             //if (!WasHit(hitPoint))
-              //throw new ArgumentException("Collision not detected!");
+            //throw new ArgumentException("Collision not detected!");
             HittedPoints.Add(hitPoint);
             var ret = 2 * (-1 * normalVel * NormalVector) * NormalVector + normalVel;
             var first = Angle(velocity, NormalVector);

@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using Billiard3D.VectorMath;
 
 namespace Billiard3D.Track
@@ -24,12 +24,12 @@ namespace Billiard3D.Track
 
         public void StartSimulation(Vector3D initialPoint, Vector3D initialVel)
         {
-            var hittedWall = Walls.First(x => System.Math.Abs(x.NormalEquation(initialPoint)) < 0.00005);
+            var hittedWall = Walls.First(x => Math.Abs(x.NormalEquation(initialPoint)) < 0.00005);
             for (var i = 0; i < NumberOfIterations; ++i)
             {
                 var order = Walls.OrderBy(x => x.NormalEquation(initialPoint));
-                var points = Walls.Except(new[] { hittedWall }).Select(x => x.NormalEquation(initialPoint));
-                hittedWall = order.First(x => x.NormalEquation(initialPoint) > 0 && x != hittedWall);
+                var points = Walls.Except(new[] {hittedWall}).Select(x => x.NormalEquation(initialPoint));
+                hittedWall = order.First(x => (x.NormalEquation(initialPoint) > 0) && (x != hittedWall));
                 initialPoint += hittedWall.NormalEquation(initialPoint) * initialVel;
                 initialVel = hittedWall.AngleAfterHit(initialPoint, initialVel);
             }

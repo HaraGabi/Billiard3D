@@ -17,17 +17,17 @@ namespace Billiard3D.VectorMath
 
         public Vector3D(IEnumerable<double> coll)
         {
-            var ints = coll as double[] ?? coll.ToArray();
-            if (ints.Length != 3)
+            var doubles = coll as double[] ?? coll.ToArray();
+            if (doubles.Length != 3)
                 throw new ArgumentException("This vector class only support 3D vectors");
-            X = ints[0];
-            Y = ints[1];
-            Z = ints[2];
+            X = doubles[0];
+            Y = doubles[1];
+            Z = doubles[2];
         }
 
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Z { get; set; }
+        public double X { get; }
+        public double Y { get; }
+        public double Z { get; }
 
         public int CompareTo(Vector3D other)
         {
@@ -58,8 +58,8 @@ namespace Billiard3D.VectorMath
 
         public static double AbsoluteValue(Vector3D vector)
         {
-            var squred = vector.Select(x => x * x).Aggregate((sum, x) => sum + x);
-            return Sqrt(squred);
+            var squared = vector.Select(x => x * x).Aggregate((sum, x) => sum + x);
+            return Sqrt(squared);
         }
 
         public override bool Equals(object obj)
@@ -69,8 +69,6 @@ namespace Billiard3D.VectorMath
             return false;
         }
 
-        // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
-        public override int GetHashCode() => base.GetHashCode();
 
         public override string ToString() => $"{{{X}, {Y}, {Z}}}";
 
@@ -88,22 +86,22 @@ namespace Billiard3D.VectorMath
 
         public static double operator *(Vector3D lValue, Vector3D rValue)
         {
-            var mult = lValue.Zip(rValue, (first, second) => first * second);
-            return mult.Sum();
+            var zip = lValue.Zip(rValue, (first, second) => first * second);
+            return zip.Sum();
         }
 
         public static Vector3D operator *(Vector3D lValue, int rValue)
         {
-            var mult = lValue.Select(x => x * rValue);
-            return new Vector3D(mult);
+            var coll = lValue.Select(x => x * rValue);
+            return new Vector3D(coll);
         }
 
         public static Vector3D operator *(int lValue, Vector3D rValue) => rValue * lValue;
 
         public static Vector3D operator *(double lValue, Vector3D rValue)
         {
-            var mult = rValue.Select(x => x * lValue);
-            return new Vector3D(mult);
+            var coll = rValue.Select(x => x * lValue);
+            return new Vector3D(coll);
         }
 
         public static Vector3D operator /(Vector3D lValue, double rValue)
@@ -145,7 +143,7 @@ namespace Billiard3D.VectorMath
             return Acos(lValue * rValue / (absR * absL));
         }
 
-        public static Vector3D Vectorial(Vector3D left, Vector3D right)
+        public static Vector3D CrossProduct(Vector3D left, Vector3D right)
         {
             var a = left.Y * right.Z - left.Z * right.Y;
             var b = left.Z * right.X - left.X * right.Z;
@@ -156,6 +154,15 @@ namespace Billiard3D.VectorMath
         public static bool IsNullVector(Vector3D vector) => vector.All(x => Abs(x) <= double.Epsilon);
 
         public Vector3D Normalize() => this / AbsoluteValue(this);
+
+        public override int GetHashCode()
+        {
+            var hashCode = -307843816;
+            hashCode = hashCode * -1521134295 + X.GetHashCode();
+            hashCode = hashCode * -1521134295 + Y.GetHashCode();
+            hashCode = hashCode * -1521134295 + Z.GetHashCode();
+            return hashCode;
+        }
     }
 
     public static class DoubleExtensions
