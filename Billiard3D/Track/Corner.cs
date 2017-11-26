@@ -12,6 +12,7 @@ namespace Billiard3D.Track
         public Corner([NotNull] Vector3D cornerPoint, double r)
             : this(cornerPoint)
         {
+
         }
 
         [NotNull]
