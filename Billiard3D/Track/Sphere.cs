@@ -1,4 +1,5 @@
-﻿using Billiard3D.VectorMath;
+﻿using System;
+using Billiard3D.VectorMath;
 using static System.Math;
 
 namespace Billiard3D.Track
@@ -21,7 +22,7 @@ namespace Billiard3D.Track
 
         public bool OnSphere(Vector3D vector) => Abs(Equation(vector)) < Confidence;
 
-        public (bool, double) OnInnerSide(Vector3D vector, Vector3D referencePoint)
+        public (bool isInner, double) OnInnerSide(Vector3D vector, Vector3D referencePoint)
         {
             var result = Equation(vector);
             if (!(Abs(result) < Confidence))
@@ -31,6 +32,37 @@ namespace Billiard3D.Track
                    Abs(Vector3D.AbsoluteValue(referencePoint) - Vector3D.AbsoluteValue(Center))
                 ? (true, result)
                 : (false, result);
+        }
+
+        public (bool, double?) DoesHit(Vector3D directionVector, Vector3D origin, Vector3D referencePoint)
+        {
+            var unitDirection = directionVector.Normalize();
+            var result = QuadraticFormula(unitDirection, origin, Center, Radius);
+            if ((result.plus < 0) && (result.minus < 0))
+                return (false, null);
+            var witPlus = OnInnerSide(origin + result.plus * unitDirection, referencePoint);
+            var withMinus = OnInnerSide(origin + result.minus * unitDirection, referencePoint);
+
+            if (!witPlus.isInner && !withMinus.isInner)
+                return (false, null);
+
+            if (withMinus.isInner && witPlus.isInner)
+                throw new ArgumentException("The algorithm is incorrect");
+
+            return witPlus.isInner ? (true, result.plus) : (true, result.minus);
+
+            (double plus, double minus) QuadraticFormula(Vector3D directionUnit, Vector3D originPoint, Vector3D center,
+                double radius)
+            {
+                var firstPart = -(directionUnit * (origin - center));
+                var oMinusC = originPoint - center;
+                var determinant = Pow(directionVector * oMinusC, 2) - Pow(Vector3D.AbsoluteValue(oMinusC), 2) +
+                                  Pow(radius, 2);
+                if (determinant < 0) return (-1, -1);
+                var plus = firstPart + Sqrt(determinant);
+                var minus = firstPart - Sqrt(determinant);
+                return (plus, minus);
+            }
         }
     }
 }
