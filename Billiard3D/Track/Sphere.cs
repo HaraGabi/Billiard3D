@@ -1,10 +1,11 @@
 ﻿using System;
 using Billiard3D.VectorMath;
+using JetBrains.Annotations;
 using static System.Math;
 
 namespace Billiard3D.Track
 {
-    internal class Sphere
+    internal class Sphere : IEquatable<Sphere>
     {
         private const double Confidence = 0.00005;
 
@@ -16,6 +17,28 @@ namespace Billiard3D.Track
 
         public Vector3D Center { get; }
         public double Radius { get; }
+
+        public bool Equals(Sphere other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(Center, other.Center) && Radius.Equals(other.Radius);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return (obj.GetType() == GetType()) && Equals((Sphere) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((Center != null ? Center.GetHashCode() : 0) * 397) ^ Radius.GetHashCode();
+            }
+        }
 
         private double Equation(Vector3D vector) => Pow(vector.X - Center.X, 2) +
                                                     Pow(vector.Y - Center.Y, 2) + Pow(vector.Z - Center.Z, 2);
@@ -33,6 +56,15 @@ namespace Billiard3D.Track
                 ? (true, result)
                 : (false, result);
         }
+
+        public static bool operator ==([CanBeNull] Sphere lValue, [CanBeNull] Sphere rValue)
+        {
+            if (lValue is null) return false;
+            if (rValue is null) return false;
+            return (lValue.Center == rValue.Center) && (lValue.Radius - rValue.Radius < Confidence);
+        }
+
+        public static bool operator !=(Sphere lValue, Sphere rValue) => !(lValue == rValue);
 
         public (bool, double?) DoesHit(Vector3D directionVector, Vector3D origin, Vector3D referencePoint)
         {

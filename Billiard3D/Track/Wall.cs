@@ -8,6 +8,10 @@ using static Billiard3D.VectorMath.Vector3D;
 
 namespace Billiard3D.Track
 {
+    /// <summary>
+    ///     We require the points to be given in order so no two points are given one after the other that are on the opposite
+    ///     of each other
+    /// </summary>
     [DebuggerDisplay("({NormalVector.X}, {NormalVector.Y}, {NormalVector.Z})")]
     internal class Wall
     {

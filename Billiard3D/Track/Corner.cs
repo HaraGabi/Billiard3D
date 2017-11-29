@@ -6,16 +6,20 @@ namespace Billiard3D.Track
 {
     internal class Corner
     {
-        public Corner([NotNull] Vector3D cornerPoint) =>
-            CornerPoint = cornerPoint ?? throw new ArgumentNullException(nameof(cornerPoint));
-
-        public Corner([NotNull] Vector3D cornerPoint, double r)
-            : this(cornerPoint)
+        public Corner([NotNull] Vector3D beginPoint, [NotNull] Vector3D endPoint, double radius)
         {
-
+            BeginPoint = beginPoint ?? throw new ArgumentNullException(nameof(beginPoint));
+            EndPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint));
+            CircleRadius = radius;
         }
 
         [NotNull]
-        public Vector3D CornerPoint { get; }
+        public Vector3D BeginPoint { get; }
+
+        [NotNull]
+        public Vector3D EndPoint { get; }
+
+        public double CircleRadius { get; }
+
     }
 }

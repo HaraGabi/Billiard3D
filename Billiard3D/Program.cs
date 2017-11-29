@@ -11,8 +11,8 @@ namespace Billiard3D
     {
         public static void Main(string[] args)
         {
-            var rightWall = new Wall(new Vector3D[] {(0, 0, 0), (3, 0, 0), (0, 0, 3), (3, 0, 3)});
-            var leftFal = new Wall(new Vector3D[] {(0, 3, 0), (3, 3, 0), (0, 3, 3), (3, 3, 3)});
+            var rightWall = new Wall(new Vector3D[] {(0, 0, 0), (3, 0, 0), (3, 0, 3), (0, 0, 3)});
+            var leftFal = new Wall(new Vector3D[] {(0, 3, 0), (3, 3, 0), (3, 3, 3), (0, 3, 3)});
             var backWall = new Wall(new Vector3D[] {(0, 0, 0), (0, 3, 0), (0, 3, 3), (0, 0, 3)});
             var frontWall = new Wall(new Vector3D[] {(3, 0, 0), (3, 0, 3), (3, 3, 3), (3, 3, 0)});
             var roof = new Wall(new Vector3D[] {(0, 0, 3), (0, 3, 3), (3, 3, 3), (3, 0, 3)});
