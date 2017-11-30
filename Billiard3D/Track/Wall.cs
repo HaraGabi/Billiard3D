@@ -21,9 +21,16 @@ namespace Billiard3D.Track
             NormalVector = CrossProduct(Corners[1] - Corners[0], Corners[2] - Corners[0]).Normalize();
             if (!CheckIfPointIsOnThePlain(Corners.Last()))
                 throw new ArgumentException();
+            foreach (var corner in Corners)
+            {
+                var index = Corners.IndexOf(corner);
+                var nextIndex = index + 1 < Corners.Count ? index + 1 : 0;
+                WallLines.Add(new Line(corner, Corners[nextIndex]));
+            }
         }
 
         public List<Vector3D> Corners { get; set; } = new List<Vector3D>();
+        public List<Line> WallLines { get; } = new List<Line>(4);
         public Vector3D NormalVector { get; set; }
         public List<Vector3D> HittedPoints { get; set; } = new List<Vector3D>();
 
