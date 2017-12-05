@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace Billiard3D.Track
 {
-    internal class Cylinder : ITrackObject
+    internal class Cylinder : ITrackObject, IEquatable<Cylinder>
     {
         public Cylinder([NotNull] Vector3D top, [NotNull] Vector3D bottom, double radius)
         {
@@ -21,6 +21,14 @@ namespace Billiard3D.Track
         public Vector3D BottomCenter { get; }
 
         public List<Vector3D> HittedPoints { get; } = new List<Vector3D>();
+
+        public bool Equals(Cylinder other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Radius.Equals(other.Radius) && Equals(TopCenter, other.TopCenter) &&
+                   Equals(BottomCenter, other.BottomCenter);
+        }
 
         /// <summary>
         ///     Gets the necessary coefficient for the line to reach cylinder
@@ -61,6 +69,24 @@ namespace Billiard3D.Track
             var newDirection = 2 * (-1 * incoming.Direction.Normalize() * normalVector) * normalVector +
                                incoming.Direction.Normalize();
             return Line.FromPointAndDirection(hittedPoint, newDirection);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return (obj.GetType() == GetType()) && Equals((Cylinder) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Radius.GetHashCode();
+                hashCode = (hashCode * 397) ^ (TopCenter != null ? TopCenter.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (BottomCenter != null ? BottomCenter.GetHashCode() : 0);
+                return hashCode;
+            }
         }
     }
 }

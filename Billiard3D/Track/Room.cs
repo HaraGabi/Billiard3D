@@ -8,78 +8,101 @@ namespace Billiard3D.Track
 {
     internal class Room
     {
-        public Room(IEnumerable<Wall> walls, double radius = 0.003)
+        public Room([NotNull] IEnumerable<Wall> walls, double radius = 0.003)
         {
+            if (walls == null) throw new ArgumentNullException(nameof(walls));
             Radius = radius;
-            Walls = new List<Wall>();
-            foreach (var wall in walls)
-            {
-                if (Walls.Any(x => x.NormalVector == wall.NormalVector))
-                    wall.NormalVector *= -1;
-                Walls.Add(wall);
-            }
-
+            Objects.AddRange(walls);
+            CreateCylinders(radius);
+            CreateSpheres(radius);
         }
 
         public double Radius { get; }
 
-        public List<Wall> Walls { get; set; }
+        public List<ITrackObject> Objects { get; set; } = new List<ITrackObject>();
 
         public int NumberOfIterations { get; set; } = 10_000;
 
         public void Start(Line startLine)
         {
-            
-        }
-
-        public void StartSimulation(Vector3D initialPoint, Vector3D initialVel)
-        {
-            var hittedWall = Walls.First(x => Math.Abs(x.NormalEquation(initialPoint)) < 0.00005);
-            var currentPoint = initialPoint;
-            for (var i = 0; i < NumberOfIterations; ++i)
+            for (var i = 0; i < NumberOfIterations; i++)
             {
-                var order = Walls.OrderBy(x => x.NormalEquation(currentPoint));
-                var points = Walls.Except(new[] {hittedWall}).Select(x => x.NormalEquation(currentPoint));
-                hittedWall = order.First(x => (x.NormalEquation(initialPoint) > 0) && (x != hittedWall));
-                var expectedHitPoint = hittedWall.NormalEquation(initialPoint) * initialVel;
-                var isCorner = WasCornerHit(hittedWall, expectedHitPoint);
-                if (isCorner)
-                {
-                    
-                }
-                currentPoint += hittedWall.NormalEquation(initialPoint) * initialVel;
-                //initialVel = hittedWall.AngleAfterHit(initialPoint, initialVel);
+                var points = Objects.Select(x => x.GetIntersectionPoints(startLine));
             }
         }
 
-        private bool WasCornerHit(Wall hitted, Vector3D hittedPoint)
+        private void CreateCylinders(double radius)
         {
-            var closestCorner = GetNthClosestCorner(hittedPoint, hitted, 0);
-            var otherWall = Walls.Except(new[] {hitted}).Where(x => x.Corners.Any(corner => corner == closestCorner))
-                .OrderBy(x => x.Corners.Min(y => Vector3D.AbsoluteValue(y - hittedPoint))).First();
-            var angle = Vector3D.Angle(otherWall.NormalVector, hitted.NormalVector);
-            var maximumDistance = CalculateDistance(angle);
-            var distanceOnWall = Math.Sqrt(Math.Pow(maximumDistance, 2) - Math.Pow(Radius, 2));
+            var cylinders = new HashSet<Cylinder>();
+            foreach (var track in Objects)
+            {
+                var wall = track as Wall ?? throw new ArgumentNullException(nameof(Objects));
+                foreach (var wallLine in wall.WallLines)
+                {
+                    var otherWall = Objects.Except(new[] {wall}).Cast<Wall>().ToList().Single(x =>
+                        x.WallLines.Exists(line =>
+                            ((line.PointA == wallLine.PointA) && (line.PointB == wallLine.PointB)) ||
+                            ((line.PointA == wallLine.PointB) && (line.PointB == wallLine.PointA))));
 
-            var secondClosestCorner = GetNthClosestCorner(hittedPoint, hitted, 1);
-            var line = new Line(closestCorner, secondClosestCorner);
-            return distanceOnWall <= line.DistanceFrom(hittedPoint);
+                    var topLine = wall.WallLines.Single(line =>
+                        ((line.PointA == wallLine.PointA) && (line.PointB != wallLine.PointB)) ||
+                        ((line.PointA == wallLine.PointB)
+                         && (line.PointB != wallLine.PointA)));
+
+                    var otherTopLine = otherWall.WallLines
+                        .Except(new[] {new Line(wallLine.PointB, wallLine.PointA), wallLine})
+                        .Single(x =>
+                            (x.PointA == topLine.PointA) || (x.PointA == topLine.PointB) ||
+                            (x.PointB == topLine.PointA) ||
+                            (x.PointB == topLine.PointB));
+
+                    var cylinder = CalculateCylinder(topLine, otherTopLine, wallLine, radius);
+                    cylinders.Add(cylinder);
+                }
+            }
+            Objects.AddRange(cylinders);
         }
 
-        private Vector3D GetNthClosestCorner([NotNull] Vector3D referencePoint, [NotNull] Wall hittedWall, int which)
+        private void CreateSpheres(double radius)
         {
-            if (referencePoint == null) throw new ArgumentNullException(nameof(referencePoint));
-            if (hittedWall == null) throw new ArgumentNullException(nameof(hittedWall));
-            if ((which < 0) || (which > 3)) throw new ArgumentException(nameof(which));
-            return hittedWall.Corners.OrderBy(x => Vector3D.AbsoluteValue(x - referencePoint)).Skip(which).First();
+            var cylinders = Objects.Where(x => x is Cylinder).Cast<Cylinder>();
+            var spheres = new HashSet<Sphere>();
+            foreach (var cylinder in cylinders)
+            {
+                var lineA = new Line(cylinder.TopCenter, cylinder.BottomCenter);
+                var lineB = new Line(cylinder.BottomCenter, cylinder.TopCenter);
+
+                var sphereA = new Sphere(lineA.GetPointOnLine(radius), radius);
+                var sphereB = new Sphere(lineB.GetPointOnLine(radius), radius);
+                spheres.Add(sphereA);
+                spheres.Add(sphereB);
+            }
+            Objects.AddRange(spheres);
         }
 
-        /// <summary>
-        ///     Calculates the distance where the center of the sphere should be using the sine theorem
-        /// </summary>
-        /// <param name="angle">The angle.</param>
-        /// <returns></returns>
-        private double CalculateDistance(double angle) =>
-            Math.Sin(angle / 2) / Math.Sin(45.0.ToRadian()) * (1 / Radius);
+        private Cylinder CalculateCylinder([NotNull] Line first, [NotNull] Line second, [NotNull] Line wallLine, double radius)
+        {
+            if (first == null) throw new ArgumentNullException(nameof(first));
+            if (second == null) throw new ArgumentNullException(nameof(second));
+            if (wallLine == null) throw new ArgumentNullException(nameof(wallLine));
+
+            var angle = Vector3D.Angle(first.Direction, second.Direction);
+            var distance = Math.Sin(90.0.ToRadian()) / Math.Sin(angle / 2) * radius;
+            var wallDistance = Math.Sqrt(Math.Pow(distance, 2) - Math.Pow(radius, 2));
+
+            var firstPoint = first.GetPointOnLine(wallDistance);
+            var secondPoint = second.GetPointOnLine(wallDistance);
+
+            var referencePoint = wallLine.Contains(first.PointA) ? first.PointA : first.PointB;
+            var line = new Line(firstPoint, secondPoint);
+            var directLine = new Line(referencePoint, line.ClosestPoint(referencePoint));
+            var top = directLine.GetPointOnLine(distance);
+
+            var difference = first.PointA - top;
+            var otherPoint = referencePoint == wallLine.PointA ? wallLine.PointB : wallLine.PointA;
+            var bottom = otherPoint + difference;
+
+            return new Cylinder(top, bottom, radius);
+        }
     }
 }

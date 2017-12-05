@@ -1,22 +1,38 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Billiard3D.VectorMath;
 using JetBrains.Annotations;
 
 namespace Billiard3D.Track
 {
-    internal class Line
+    internal class Line : IEquatable<Line>, IEnumerable<Vector3D>
     {
         public Line([NotNull] Vector3D pointA, [NotNull] Vector3D pointB)
         {
             PointB = pointB ?? throw new ArgumentNullException(nameof(pointB));
             PointA = pointA ?? throw new ArgumentNullException(nameof(pointA));
-            Direction = PointB - PointA;
+            Direction = (PointB - PointA).Normalize();
         }
 
         public Vector3D PointB { get; }
         public Vector3D PointA { get; }
         public Vector3D Direction { get; }
+
+        public IEnumerator<Vector3D> GetEnumerator()
+        {
+            yield return PointA;
+            yield return PointB;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public bool Equals(Line other)
+        {
+            if (other is null) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(PointB, other.PointB) && Equals(PointA, other.PointA) && Equals(Direction, other.Direction);
+        }
 
         /// <summary>
         ///     Creates a <see cref="Line" /> using one point and a direction vector
@@ -77,5 +93,23 @@ namespace Billiard3D.Track
         /// <param name="distance">The distance.</param>
         /// <returns></returns>
         public Vector3D GetPointOnLine(double distance) => PointA + distance * Direction.Normalize();
+
+        public override bool Equals(object obj)
+        {
+            if (obj is null) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return (obj.GetType() == GetType()) && Equals((Line) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = PointB != null ? PointB.GetHashCode() : 0;
+                hashCode = (hashCode * 397) ^ (PointA != null ? PointA.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Direction != null ? Direction.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
     }
 }

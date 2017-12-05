@@ -45,7 +45,12 @@ namespace Billiard3D.VectorMath
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public bool Equals(Vector3D other) => this.SequenceEqual(other);
+        public bool Equals(Vector3D other)
+        {
+            if (other is null)
+                return false;
+            return this.SequenceEqual(other);
+        }
 
         public void Deconstruct(out double x, out double y, out double z)
         {

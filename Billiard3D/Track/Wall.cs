@@ -63,17 +63,5 @@ namespace Billiard3D.Track
             var forZ = NormalVector.Z * (point.z - Corners.First().Z);
             return forX + forY + forZ <= confidence;
         }
-
-        public double NormalEquation(Vector3D tuple)
-        {
-            var ax = NormalVector.X * tuple.X;
-            var by = NormalVector.Y * tuple.Y;
-            var cz = NormalVector.Z * tuple.Z;
-            var d = NormalVector.X * Corners.First().X + NormalVector.Y * Corners.First().Y +
-                    NormalVector.Z * Corners.First().Z;
-            return ax + by + cz - d;
-        }
-
-        public bool WasHit(Vector3D hitPoint) => CheckIfPointIsOnThePlain(hitPoint);
     }
 }
