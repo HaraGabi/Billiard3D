@@ -18,6 +18,7 @@ namespace Billiard3D.Track
                     wall.NormalVector *= -1;
                 Walls.Add(wall);
             }
+
         }
 
         public double Radius { get; }
@@ -25,6 +26,11 @@ namespace Billiard3D.Track
         public List<Wall> Walls { get; set; }
 
         public int NumberOfIterations { get; set; } = 10_000;
+
+        public void Start(Line startLine)
+        {
+            
+        }
 
         public void StartSimulation(Vector3D initialPoint, Vector3D initialVel)
         {
@@ -42,7 +48,7 @@ namespace Billiard3D.Track
                     
                 }
                 currentPoint += hittedWall.NormalEquation(initialPoint) * initialVel;
-                initialVel = hittedWall.AngleAfterHit(initialPoint, initialVel);
+                //initialVel = hittedWall.AngleAfterHit(initialPoint, initialVel);
             }
         }
 

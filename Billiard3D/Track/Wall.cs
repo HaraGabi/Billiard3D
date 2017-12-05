@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Billiard3D.VectorMath;
-using static System.Math;
 using static Billiard3D.VectorMath.Vector3D;
 
 namespace Billiard3D.Track
@@ -13,8 +12,10 @@ namespace Billiard3D.Track
     ///     of each other
     /// </summary>
     [DebuggerDisplay("({NormalVector.X}, {NormalVector.Y}, {NormalVector.Z})")]
-    internal class Wall
+    internal class Wall : ITrackObject
     {
+        private const double Confidence = 0.00005;
+
         public Wall(IEnumerable<Vector3D> corners)
         {
             Corners.AddRange(corners);
@@ -33,6 +34,26 @@ namespace Billiard3D.Track
         public List<Line> WallLines { get; } = new List<Line>(4);
         public Vector3D NormalVector { get; set; }
         public List<Vector3D> HittedPoints { get; set; } = new List<Vector3D>();
+
+
+        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
+        {
+            if (line.Direction * NormalVector < Confidence)
+            {
+                // No Intersection
+                yield break;
+            }
+            var distance = (Corners.First() - line.PointA) * NormalVector / (line.Direction * NormalVector);
+            yield return line.PointA + distance * line.Direction;
+        }
+
+        public Line LineAfterHit(Line incoming, Vector3D hittedPoint)
+        {
+            HittedPoints.Add(hittedPoint);
+            var newDirection = 2 * (-1 * incoming.Direction.Normalize() * NormalVector) * NormalVector +
+                               incoming.Direction.Normalize();
+            return Line.FromPointAndDirection(hittedPoint, newDirection);
+        }
 
         private bool CheckIfPointIsOnThePlain((double x, double y, double z) point)
         {
@@ -54,21 +75,5 @@ namespace Billiard3D.Track
         }
 
         public bool WasHit(Vector3D hitPoint) => CheckIfPointIsOnThePlain(hitPoint);
-
-        public Vector3D AngleAfterHit(Vector3D hitPoint, Vector3D velocity)
-        {
-            var normalVel = velocity.Normalize();
-            //if (!WasHit(hitPoint))
-            //throw new ArgumentException("Collision not detected!");
-            HittedPoints.Add(hitPoint);
-            var ret = 2 * (-1 * normalVel * NormalVector) * NormalVector + normalVel;
-            var first = Angle(velocity, NormalVector);
-            first = first > PI / 2 ? Abs(first - PI) : first;
-            var second = Angle(ret, NormalVector);
-            second = second > PI / 2 ? Abs(second - PI) : second;
-            if (Sin(first) - Sin(second) > 0.0005)
-                throw new InvalidOperationException($"incoming {first.ToDegree()} going out {second.ToDegree()}");
-            return ret;
-        }
     }
 }

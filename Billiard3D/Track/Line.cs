@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Billiard3D.VectorMath;
 using JetBrains.Annotations;
 
@@ -17,7 +18,33 @@ namespace Billiard3D.Track
         public Vector3D PointA { get; }
         public Vector3D Direction { get; }
 
-        public double DistanceFrom(Vector3D point)
+        /// <summary>
+        ///     Creates a <see cref="Line" /> using one point and a direction vector
+        /// </summary>
+        /// <param name="point">The point.</param>
+        /// <param name="direction">The direction.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">
+        ///     point
+        ///     or
+        ///     direction
+        /// </exception>
+        public static Line FromPointAndDirection([NotNull] Vector3D point, [NotNull] Vector3D direction)
+        {
+            if (point == null) throw new ArgumentNullException(nameof(point));
+            if (direction == null) throw new ArgumentNullException(nameof(direction));
+
+            var pointB = point + 1.26 * direction;
+            return new Line(point, pointB);
+        }
+
+        /// <summary>
+        ///     The given point's distance from the line
+        /// </summary>
+        /// <param name="point">The point.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">point</exception>
+        public double DistanceFrom([NotNull] Vector3D point)
         {
             if (point == null)
                 throw new ArgumentNullException(nameof(point));
@@ -29,6 +56,12 @@ namespace Billiard3D.Track
             return result;
         }
 
+        /// <summary>
+        ///     Closest point in the line to the point.
+        /// </summary>
+        /// <param name="toThisReference">To this reference.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">toThisReference</exception>
         public Vector3D ClosestPoint([NotNull] Vector3D toThisReference)
         {
             if (toThisReference == null) throw new ArgumentNullException(nameof(toThisReference));
@@ -38,6 +71,11 @@ namespace Billiard3D.Track
             return PointA + t * Direction.Normalize();
         }
 
+        /// <summary>
+        ///     Gets the point on line.
+        /// </summary>
+        /// <param name="distance">The distance.</param>
+        /// <returns></returns>
         public Vector3D GetPointOnLine(double distance) => PointA + distance * Direction.Normalize();
     }
 }
