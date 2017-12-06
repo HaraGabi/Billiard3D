@@ -68,9 +68,18 @@ namespace Billiard3D.Track
             var result = new List<(Vector3D, double)>();
 
             if ((discardMode == DiscardMode.Keep) || (firstValue > 0))
-                result.Add((line.PointA + firstValue * line.Direction, firstValue));
+            {
+                var point = line.PointA + firstValue * line.Direction;
+                if (point.All(x => x <= 300 && x >= 0))
+                    result.Add((point, firstValue));
+            }
+
             if ((discardMode == DiscardMode.Keep) || (secondValue > 0))
-                result.Add((line.PointA + secondValue * line.Direction, secondValue));
+            {
+                var point = line.PointA + secondValue * line.Direction;
+                if (point.All(x => x <= 300 && x >= 0))
+                    result.Add((point, secondValue));
+            }
 
             return (result, this);
         }
@@ -80,7 +89,7 @@ namespace Billiard3D.Track
             HittedPoints.Add(hittedPoint);
             var baseLine = new Line(TopCenter, BottomCenter);
             var line = new Line(baseLine.ClosestPoint(hittedPoint), hittedPoint);
-            var normalVector = line.Direction.Normalize();
+            var normalVector = - 1 * line.Direction.Normalize();
 
             var newDirection = 2 * (-1 * incoming.Direction.Normalize() * normalVector) * normalVector +
                                incoming.Direction.Normalize();

@@ -9,6 +9,14 @@ namespace Billiard3D
     [UsedImplicitly]
     public class Programs
     {
+        internal static Line RandomStarter(int max)
+        {
+            var random = new Random();
+            var startLocation = (random.Next(max), random.Next(max), random.Next(max));
+            var startDirection = (random.Next(max), random.Next(max), random.Next(max));
+            return Line.FromPointAndDirection(startLocation, startDirection);
+        }
+
         public static void Main(string[] args)
         {
             var rightWall = new Wall(new Vector3D[] {(0, 0, 0), (300, 0, 0), (300, 0, 300), (0, 0, 300)});
@@ -18,18 +26,7 @@ namespace Billiard3D
             var roof = new Wall(new Vector3D[] {(0, 0, 300), (0, 300, 300), (300, 300, 300), (300, 0, 300)});
             var floor = new Wall(new Vector3D[] {(0, 0, 0), (0, 300, 0), (300, 300, 0), (300, 0, 0)});
             var room = new Room(new[] {rightWall, leftFal, backWall, frontWall, roof, floor}, 0.5);
-            room.Start(Line.FromPointAndDirection((150, 150, 150), (1, 0, 0)));
-
-            var imageMatrix = new short[300, 300];
-            var xCords = rightWall.HittedPoints.Select(x => x.X).ToList();
-            var zCords = rightWall.HittedPoints.Select(x => x.Z).ToList();
-            for (var i = 0; i < xCords.Count; ++i)
-            {
-                var x = (int) (Math.Round(xCords[i], 2) * 100);
-                var y = (int) (Math.Round(zCords[i], 2) * 100);
-                imageMatrix[x, y]++;
-            }
-            Console.ReadKey();
+            var objects = room.Start(RandomStarter(150));
         }
     }
 }
