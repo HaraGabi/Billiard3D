@@ -27,13 +27,13 @@ namespace Billiard3D.Track
         {
             for (var i = 0; i < NumberOfIterations; i++)
             {
-                var points = Objects.Select(x => x.GetIntersectionPoints(startLine));
+                var points = Objects.SelectMany(x => x.GetIntersectionPoints(startLine));
             }
         }
 
         private void CreateCylinders(double radius)
         {
-            var cylinders = new HashSet<Cylinder>();
+            var cylinders = new List<Cylinder>();
             foreach (var track in Objects)
             {
                 var wall = track as Wall ?? throw new ArgumentNullException(nameof(Objects));
@@ -57,6 +57,8 @@ namespace Billiard3D.Track
                             (x.PointB == topLine.PointB));
 
                     var cylinder = CalculateCylinder(topLine, otherTopLine, wallLine, radius);
+                    if (cylinders.Exists(x => x.Contains(cylinder.TopCenter) && x.Contains(cylinder.BottomCenter)))
+                        continue;
                     cylinders.Add(cylinder);
                 }
             }
@@ -66,7 +68,7 @@ namespace Billiard3D.Track
         private void CreateSpheres(double radius)
         {
             var cylinders = Objects.Where(x => x is Cylinder).Cast<Cylinder>();
-            var spheres = new HashSet<Sphere>();
+            var spheres = new List<Sphere>();
             foreach (var cylinder in cylinders)
             {
                 var lineA = new Line(cylinder.TopCenter, cylinder.BottomCenter);
@@ -74,13 +76,16 @@ namespace Billiard3D.Track
 
                 var sphereA = new Sphere(lineA.GetPointOnLine(radius), radius);
                 var sphereB = new Sphere(lineB.GetPointOnLine(radius), radius);
-                spheres.Add(sphereA);
-                spheres.Add(sphereB);
+                if (!spheres.Exists(x => x.Center == sphereA.Center))
+                    spheres.Add(sphereA);
+                if (!spheres.Exists(x => x.Center == sphereB.Center))
+                    spheres.Add(sphereB);
             }
             Objects.AddRange(spheres);
         }
 
-        private Cylinder CalculateCylinder([NotNull] Line first, [NotNull] Line second, [NotNull] Line wallLine, double radius)
+        private Cylinder CalculateCylinder([NotNull] Line first, [NotNull] Line second, [NotNull] Line wallLine,
+            double radius)
         {
             if (first == null) throw new ArgumentNullException(nameof(first));
             if (second == null) throw new ArgumentNullException(nameof(second));
@@ -90,15 +95,18 @@ namespace Billiard3D.Track
             var distance = Math.Sin(90.0.ToRadian()) / Math.Sin(angle / 2) * radius;
             var wallDistance = Math.Sqrt(Math.Pow(distance, 2) - Math.Pow(radius, 2));
 
-            var firstPoint = first.GetPointOnLine(wallDistance);
-            var secondPoint = second.GetPointOnLine(wallDistance);
-
             var referencePoint = wallLine.Contains(first.PointA) ? first.PointA : first.PointB;
+            var firstSign = first.PointA == referencePoint ? +1 : -1;
+            var secondSign = second.PointA == referencePoint ? +1 : -1;
+
+            var firstPoint = first.GetPointOnLine(referencePoint, firstSign * wallDistance);
+            var secondPoint = second.GetPointOnLine(referencePoint, secondSign * wallDistance);
+
             var line = new Line(firstPoint, secondPoint);
             var directLine = new Line(referencePoint, line.ClosestPoint(referencePoint));
             var top = directLine.GetPointOnLine(distance);
 
-            var difference = first.PointA - top;
+            var difference = top - referencePoint;
             var otherPoint = referencePoint == wallLine.PointA ? wallLine.PointB : wallLine.PointA;
             var bottom = otherPoint + difference;
 

@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Billiard3D.VectorMath;
 using JetBrains.Annotations;
 
 namespace Billiard3D.Track
 {
-    internal class Cylinder : ITrackObject, IEquatable<Cylinder>
+    internal class Cylinder : ITrackObject, IEquatable<Cylinder>, IEnumerable<Vector3D>
     {
         public Cylinder([NotNull] Vector3D top, [NotNull] Vector3D bottom, double radius)
         {
@@ -22,12 +24,19 @@ namespace Billiard3D.Track
 
         public List<Vector3D> HittedPoints { get; } = new List<Vector3D>();
 
+        public IEnumerator<Vector3D> GetEnumerator()
+        {
+            yield return TopCenter;
+            yield return BottomCenter;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
         public bool Equals(Cylinder other)
         {
-            if (ReferenceEquals(null, other)) return false;
+            if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Radius.Equals(other.Radius) && Equals(TopCenter, other.TopCenter) &&
-                   Equals(BottomCenter, other.BottomCenter);
+            return Radius.Equals(other.Radius) && this.Contains(other.TopCenter) && this.Contains(other.BottomCenter);
         }
 
         /// <summary>
@@ -73,7 +82,7 @@ namespace Billiard3D.Track
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
             return (obj.GetType() == GetType()) && Equals((Cylinder) obj);
         }

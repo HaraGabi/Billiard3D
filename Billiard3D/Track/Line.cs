@@ -82,9 +82,11 @@ namespace Billiard3D.Track
         {
             if (toThisReference == null) throw new ArgumentNullException(nameof(toThisReference));
 
+            //return PointA + (toThisReference - PointA) * Direction / Direction * Direction * Direction;
+
             var v = toThisReference - PointA;
             var t = v * Direction.Normalize();
-            return PointA + t * Direction.Normalize();
+            return PointA + t * Direction;
         }
 
         /// <summary>
@@ -92,7 +94,16 @@ namespace Billiard3D.Track
         /// </summary>
         /// <param name="distance">The distance.</param>
         /// <returns></returns>
-        public Vector3D GetPointOnLine(double distance) => PointA + distance * Direction.Normalize();
+        public Vector3D GetPointOnLine(double distance) => PointA + distance * Direction;
+
+        /// <summary>
+        ///     Gets the point on line assuming the given reference is already on the line
+        /// </summary>
+        /// <param name="referencePoint">The reference point.</param>
+        /// <param name="distance">The distance.</param>
+        /// <returns></returns>
+        public Vector3D GetPointOnLine(Vector3D referencePoint, double distance) =>
+            referencePoint + distance * Direction;
 
         public override bool Equals(object obj)
         {

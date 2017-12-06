@@ -49,7 +49,11 @@ namespace Billiard3D.VectorMath
         {
             if (other is null)
                 return false;
-            return this.SequenceEqual(other);
+            const double confidence = 0.00005;
+            var first = Math.Abs(X - other.X) < confidence;
+            var second = Math.Abs(Y - other.Y) < confidence;
+            var third = Math.Abs(Z - other.Z) < confidence;
+            return first && second && third;
         }
 
         public void Deconstruct(out double x, out double y, out double z)
