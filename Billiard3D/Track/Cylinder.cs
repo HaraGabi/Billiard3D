@@ -43,8 +43,9 @@ namespace Billiard3D.Track
         ///     Gets the necessary coefficient for the line to reach cylinder
         /// </summary>
         /// <param name="line"></param>
+        /// <param name="discardMode"></param>
         /// <returns></returns>
-        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
+        public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line, DiscardMode discardMode)
         {
             if (line == null) throw new ArgumentNullException(nameof(line));
 
@@ -64,8 +65,14 @@ namespace Billiard3D.Track
             var firstValue = (-b + Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / 2 * a;
             var secondValue = (-b - Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / 2 * a;
 
-            yield return line.PointA + firstValue * line.Direction;
-            yield return line.PointA + secondValue * line.Direction;
+            var result = new List<(Vector3D, double)>();
+
+            if ((discardMode == DiscardMode.Keep) || (firstValue > 0))
+                result.Add((line.PointA + firstValue * line.Direction, firstValue));
+            if ((discardMode == DiscardMode.Keep) || (secondValue > 0))
+                result.Add((line.PointA + secondValue * line.Direction, secondValue));
+
+            return (result, this);
         }
 
         public Line LineAfterHit(Line incoming, Vector3D hittedPoint)

@@ -36,15 +36,17 @@ namespace Billiard3D.Track
         public List<Vector3D> HittedPoints { get; set; } = new List<Vector3D>();
 
 
-        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
+        public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line, DiscardMode discardMode)
         {
-            if (line.Direction * NormalVector < Confidence)
+            if (Math.Abs(line.Direction * NormalVector) < Confidence)
             {
                 // No Intersection
-                yield break;
+                return (Enumerable.Empty<(Vector3D, double)>(), this);
             }
             var distance = (Corners.First() - line.PointA) * NormalVector / (line.Direction * NormalVector);
-            yield return line.PointA + distance * line.Direction;
+            if ((discardMode == DiscardMode.DiscardBackWards) && (distance < 0))
+                return (Enumerable.Empty<(Vector3D, double)>(), this);
+            return (new[] {(line.PointA + distance * line.Direction, distance)}, this);
         }
 
         public Line LineAfterHit(Line incoming, Vector3D hittedPoint)

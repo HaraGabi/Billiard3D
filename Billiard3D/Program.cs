@@ -18,7 +18,7 @@ namespace Billiard3D
             var roof = new Wall(new Vector3D[] {(0, 0, 300), (0, 300, 300), (300, 300, 300), (300, 0, 300)});
             var floor = new Wall(new Vector3D[] {(0, 0, 0), (0, 300, 0), (300, 300, 0), (300, 0, 0)});
             var room = new Room(new[] {rightWall, leftFal, backWall, frontWall, roof, floor}, 0.5);
-            room.Start(Line.FromPointAndDirection((1.5, 0, 1.5), (0, 1.7, 2.4)));
+            room.Start(Line.FromPointAndDirection((150, 150, 150), (1, 0, 0)));
 
             var imageMatrix = new short[300, 300];
             var xCords = rightWall.HittedPoints.Select(x => x.X).ToList();

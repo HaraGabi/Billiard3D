@@ -23,12 +23,48 @@ namespace Billiard3D.Track
 
         public int NumberOfIterations { get; set; } = 10_000;
 
-        public void Start(Line startLine)
+        private double MinimumWallDistance { get; set; }
+
+        public List<ITrackObject> Start(Line startLine)
         {
+            var currentLine = startLine;
+            var previous = new List<ITrackObject>();
             for (var i = 0; i < NumberOfIterations; i++)
             {
-                var points = Objects.SelectMany(x => x.GetIntersectionPoints(startLine));
+                var hitPoints = Objects.Except(previous).Select(x => x.GetIntersectionPoints(currentLine, DiscardMode.DiscardBackWards)).Where(x => x.Item1.Any()).ToList();
+                var hittedWall = hitPoints.Where(x => x.Item2 is Wall && x.Item1.Any()).OrderBy(x => x.Item1.Min(y => y.Item2)).First();
+
+                var hitPoint = hittedWall.Item1.First().Item1;
+                var wall = hittedWall.Item2 as Wall ?? throw new InvalidOperationException();
+                if (wall.WallLines.Any(x => x.DistanceFrom(hitPoint) < MinimumWallDistance))
+                {
+                    var hittedSphere = hitPoints.FirstOrDefault(x => x.Item2 is Sphere);
+                    if (hittedSphere.Item2 is null)
+                    {
+                        // no sphere was hit
+                        var hittedCylinder = hitPoints.Where(x => x.Item2 is Cylinder).First(x => x.Item1.Any());
+                        var cylinderHitPoint = hittedCylinder.Item1.OrderBy(x => x.Item2).Last();
+                        currentLine = hittedCylinder.Item2.LineAfterHit(currentLine, cylinderHitPoint.Item1);
+                        previous.Clear();
+                        previous.Add(hittedCylinder.Item2);
+                    }
+                    else
+                    {
+                        var sphereHitPoint = hittedSphere.Item1.OrderBy(x => x.Item2).Last();
+                        currentLine = hittedSphere.Item2.LineAfterHit(currentLine, sphereHitPoint.Item1);
+                        previous.Clear();
+                        previous.Add(hittedSphere.Item2);
+                    }
+                }
+                else
+                {
+                    // wall was hit
+                    currentLine = wall.LineAfterHit(currentLine, hitPoint);
+                    previous.Clear();
+                    previous.Add(wall);
+                }
             }
+            return Objects;
         }
 
         private void CreateCylinders(double radius)
@@ -93,14 +129,14 @@ namespace Billiard3D.Track
 
             var angle = Vector3D.Angle(first.Direction, second.Direction);
             var distance = Math.Sin(90.0.ToRadian()) / Math.Sin(angle / 2) * radius;
-            var wallDistance = Math.Sqrt(Math.Pow(distance, 2) - Math.Pow(radius, 2));
+            MinimumWallDistance = Math.Sqrt(Math.Pow(distance, 2) - Math.Pow(radius, 2));
 
             var referencePoint = wallLine.Contains(first.PointA) ? first.PointA : first.PointB;
             var firstSign = first.PointA == referencePoint ? +1 : -1;
             var secondSign = second.PointA == referencePoint ? +1 : -1;
 
-            var firstPoint = first.GetPointOnLine(referencePoint, firstSign * wallDistance);
-            var secondPoint = second.GetPointOnLine(referencePoint, secondSign * wallDistance);
+            var firstPoint = first.GetPointOnLine(referencePoint, firstSign * MinimumWallDistance);
+            var secondPoint = second.GetPointOnLine(referencePoint, secondSign * MinimumWallDistance);
 
             var line = new Line(firstPoint, secondPoint);
             var directLine = new Line(referencePoint, line.ClosestPoint(referencePoint));

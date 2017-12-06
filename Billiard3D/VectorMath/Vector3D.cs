@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using static System.Math;
 
 namespace Billiard3D.VectorMath
 {
+    [DebuggerDisplay("({X} {Y} {Z})")]
     internal class Vector3D : IEnumerable<double>, IComparable<Vector3D>, IEquatable<Vector3D>
     {
         public Vector3D(double x, double y, double z)
@@ -50,9 +52,9 @@ namespace Billiard3D.VectorMath
             if (other is null)
                 return false;
             const double confidence = 0.00005;
-            var first = Math.Abs(X - other.X) < confidence;
-            var second = Math.Abs(Y - other.Y) < confidence;
-            var third = Math.Abs(Z - other.Z) < confidence;
+            var first = Abs(X - other.X) < confidence;
+            var second = Abs(Y - other.Y) < confidence;
+            var third = Abs(Z - other.Z) < confidence;
             return first && second && third;
         }
 
