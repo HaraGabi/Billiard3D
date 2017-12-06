@@ -51,7 +51,7 @@ namespace Billiard3D.Track
                 results.Add((line.PointA + minus * line.Direction, minus));
             return (results, this);
         }
-
+        //
         public Line LineAfterHit(Line incoming, Vector3D hittedPoint)
         {
             HittedPoints.Add(hittedPoint);

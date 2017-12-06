@@ -66,7 +66,7 @@ namespace Billiard3D.Track
             var secondValue = (-b - Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / 2 * a;
 
             var result = new List<(Vector3D, double)>();
-
+            // todo: one or two results
             if ((discardMode == DiscardMode.Keep) || (firstValue > 0))
             {
                 var point = line.PointA + firstValue * line.Direction;
@@ -80,6 +80,7 @@ namespace Billiard3D.Track
                 if (point.All(x => x <= 300 && x >= 0))
                     result.Add((point, secondValue));
             }
+            // todo: zero not accepted
 
             return (result, this);
         }

@@ -43,6 +43,7 @@ namespace Billiard3D.Track
                 // No Intersection
                 return (Enumerable.Empty<(Vector3D, double)>(), this);
             }
+            // todo: specifics
             var distance = (Corners.First() - line.PointA) * NormalVector / (line.Direction * NormalVector);
             if ((discardMode == DiscardMode.DiscardBackWards) && (distance < 0))
                 return (Enumerable.Empty<(Vector3D, double)>(), this);
@@ -52,6 +53,7 @@ namespace Billiard3D.Track
         public Line LineAfterHit(Line incoming, Vector3D hittedPoint)
         {
             HittedPoints.Add(hittedPoint);
+            // todo: specifics
             var newDirection = 2 * (-1 * incoming.Direction.Normalize() * NormalVector) * NormalVector +
                                incoming.Direction.Normalize();
             return Line.FromPointAndDirection(hittedPoint, newDirection);
@@ -60,10 +62,10 @@ namespace Billiard3D.Track
         private bool CheckIfPointIsOnThePlain((double x, double y, double z) point)
         {
             const double confidence = 0.000001;
-            var forX = NormalVector.X * (point.x - Corners.First().X);
-            var forY = NormalVector.Y * (point.y - Corners.First().Y);
-            var forZ = NormalVector.Z * (point.z - Corners.First().Z);
-            return forX + forY + forZ <= confidence;
+            var forX = Math.Abs(NormalVector.X * (point.x - Corners.First().X)) <= confidence;
+            var forY = Math.Abs(NormalVector.Y * (point.y - Corners.First().Y)) <= confidence;
+            var forZ = Math.Abs(NormalVector.Z * (point.z - Corners.First().Z)) <= confidence;
+            return forX && forY && forZ;
         }
     }
 }

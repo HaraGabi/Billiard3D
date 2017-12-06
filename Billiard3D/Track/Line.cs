@@ -29,6 +29,7 @@ namespace Billiard3D.Track
 
         public bool Equals(Line other)
         {
+            // todo: fix me
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
             return Equals(PointB, other.PointB) && Equals(PointA, other.PointA) && Equals(Direction, other.Direction);
@@ -64,6 +65,8 @@ namespace Billiard3D.Track
         {
             if (point == null)
                 throw new ArgumentNullException(nameof(point));
+
+            // todo: specifics
 
             var topValue = Math.Pow(Vector3D.AbsoluteValue(Vector3D.CrossProduct(Direction, PointA - point)), 2);
             var bottomValue = Math.Pow(Vector3D.AbsoluteValue(Direction), 2);
