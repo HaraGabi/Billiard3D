@@ -49,7 +49,7 @@ namespace Billiard3D.Track
             };
             return (results, this);
         }
-
+        //
         public Line LineAfterHit(Line incoming, Vector3D hittedPoint)
         {
             HittedPoints.Add(hittedPoint);
