@@ -26,7 +26,7 @@ namespace Billiard3D.Track
             return Equals(Center, other.Center) && Radius.Equals(other.Radius);
         }
 
-        public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line, DiscardMode discardMode)
+        public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line)
         {
             var lineDir = line.Direction.Normalize();
             var discriminant = Pow(lineDir * (line.PointA - Center), 2) -
@@ -40,15 +40,13 @@ namespace Billiard3D.Track
             var minus = -(lineDir * (line.PointA - Center)) - Sqrt(discriminant);
             if (discriminant < 0.000005)
             {
-                if ((discardMode == DiscardMode.DiscardBackWards) && (plus < 0))
-                    return (Enumerable.Empty<(Vector3D, double)>(), this);
                 return (new List<(Vector3D, double)> {(line.PointA + plus * line.Direction, plus)}, this);
             }
-            var results = new List<(Vector3D, double)>();
-            if ((discardMode == DiscardMode.Keep) || (plus > 0))
-                results.Add((line.PointA + plus * line.Direction, plus));
-            if ((discardMode == DiscardMode.Keep) || (minus > 0))
-                results.Add((line.PointA + minus * line.Direction, minus));
+            var results = new List<(Vector3D, double)>
+            {
+                (line.PointA + plus * line.Direction, plus),
+                (line.PointA + minus * line.Direction, minus)
+            };
             return (results, this);
         }
 

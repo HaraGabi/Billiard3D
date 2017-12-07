@@ -31,7 +31,7 @@ namespace Billiard3D.Track
             var previous = new List<ITrackObject>();
             for (var i = 0; i < NumberOfIterations; i++)
             {
-                var hitPoints = Objects.Except(previous).Select(x => x.GetIntersectionPoints(currentLine, DiscardMode.DiscardBackWards)).Where(x => x.Item1.Any()).ToList();
+                var hitPoints = Objects.Select(x => x.GetIntersectionPoints(currentLine, DiscardMode.DiscardBackWards)).Where(x => x.Item1.Any()).ToList();
                 var hittedWall = hitPoints.Where(x => x.Item2 is Wall && x.Item1.Any()).OrderBy(x => x.Item1.Min(y => y.Item2)).First();
 
                 var hitPoint = hittedWall.Item1.First().Item1;

@@ -45,7 +45,7 @@ namespace Billiard3D.Track
         /// <param name="line"></param>
         /// <param name="discardMode"></param>
         /// <returns></returns>
-        public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line, DiscardMode discardMode)
+        public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line)
         {
             if (line == null) throw new ArgumentNullException(nameof(line));
 
@@ -62,24 +62,14 @@ namespace Billiard3D.Track
             var b = 2 * (kisA * kisC);
             var c = kisC * kisC - Math.Pow(Radius, 2);
 
-            var firstValue = (-b + Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / 2 * a;
-            var secondValue = (-b - Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / 2 * a;
+            var positive = (-b + Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / 2 * a;
+            var negative = (-b - Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / 2 * a;
 
-            var result = new List<(Vector3D, double)>();
-
-            if ((discardMode == DiscardMode.Keep) || (firstValue > 0))
+            var result = new List<(Vector3D, double)>
             {
-                var point = line.PointA + firstValue * line.Direction;
-                if (point.All(x => x <= 300 && x >= 0))
-                    result.Add((point, firstValue));
-            }
-
-            if ((discardMode == DiscardMode.Keep) || (secondValue > 0))
-            {
-                var point = line.PointA + secondValue * line.Direction;
-                if (point.All(x => x <= 300 && x >= 0))
-                    result.Add((point, secondValue));
-            }
+                (line.PointA + positive * line.Direction, positive),
+                (line.PointA + negative * line.Direction, negative)
+            };
 
             return (result, this);
         }
