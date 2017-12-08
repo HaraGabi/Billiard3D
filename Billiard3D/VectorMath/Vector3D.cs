@@ -7,7 +7,9 @@ using static System.Math;
 
 namespace Billiard3D.VectorMath
 {
-    [DebuggerDisplay("({X} {Y} {Z})")]
+    using JetBrains.Annotations;
+
+    [DebuggerDisplay("({X}; {Y}; {Z})")]
     internal class Vector3D : IEnumerable<double>, IComparable<Vector3D>, IEquatable<Vector3D>
     {
         public Vector3D(double x, double y, double z)
@@ -78,6 +80,13 @@ namespace Billiard3D.VectorMath
             if (obj is Vector3D other)
                 return Equals(other);
             return false;
+        }
+
+        public double DistanceFrom([NotNull] Vector3D other)
+        {
+            if (other == null)
+                throw new ArgumentNullException(nameof(other));
+            return AbsoluteValue(this - other);
         }
 
 

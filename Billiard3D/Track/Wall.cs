@@ -46,33 +46,26 @@ namespace Billiard3D.Track
             // todo: specifics
             var distance = (Corners.First() - line.PointA) * NormalVector / (line.Direction * NormalVector);
             var hitPoint = new List<(Vector3D, double)> { (line.PointA + distance * line.Direction, distance) };
-            hitPoint = hitPoint.Where(x => x.Item2 > 0).Where(x => OnTheWall(x.Item1)).ToList();
+            hitPoint = hitPoint.Where(x => x.Item2 > 0.00005).Where(x => OnTheWall(x.Item1)).ToList();
 
             return (hitPoint, this);
         }
 
         private bool OnTheWall(Vector3D hitPoint)
         {
-            bool inBetween = true;
-            for (var i = 0; i < WallLines.Count; ++i)
-            {
-                var otherSideIndex = i + 2;
-                if (otherSideIndex >= WallLines.Count)
-                {
-                    otherSideIndex -= WallLines.Count;
-                }
-                var otherSide = WallLines[otherSideIndex];
+            var maxX = Corners.Max(x => x.X);
+            var maxY = Corners.Max(x => x.Y);
+            var maxZ = Corners.Max(x => x.Z);
 
-                var currentProjection = WallLines[i].ClosestPoint(hitPoint);
-                var otherProjection = otherSide.ClosestPoint(hitPoint);
+            var minX = Corners.Min(x => x.X);
+            var minY = Corners.Min(x => x.Y);
+            var minZ = Corners.Min(x => x.Z);
 
-                var planeDistnace = AbsoluteValue(otherProjection - currentProjection);
-                var distanceFromOther = AbsoluteValue(otherProjection - hitPoint);
-                var distanceFromCurrent = AbsoluteValue(currentProjection - hitPoint);
+            var forX = (hitPoint.X <= maxX) && (hitPoint.X >= minX);
+            var forY = (hitPoint.Y <= maxY) && (hitPoint.Y >= minY);
+            var forZ = (hitPoint.Z <= maxZ) && (hitPoint.Z >= minZ);
 
-                var between = Math.Abs((distanceFromCurrent + distanceFromOther) - planeDistnace) < Confidence;
-                inBetween = inBetween && between;
-            }
+            var inBetween = forX && forY && forZ;
             return inBetween;
         }
 

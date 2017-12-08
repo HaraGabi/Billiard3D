@@ -61,17 +61,15 @@ namespace Billiard3D.Track
             var b = 2 * (kisA * kisC);
             var c = kisC * kisC - Math.Pow(Radius, 2);
 
-            var positive = (-b + Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / (2 * a);
-            var negative = (-b - Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / (2 * a);
+            var positive = (-b + Math.Sqrt(Math.Pow(b, 2) - 4 * a * c)) / (2 * a);
+            var negative = (-b - Math.Sqrt(Math.Pow(b, 2) - 4 * a * c)) / (2 * a);
 
             var result = new List<(Vector3D, double)>
                 {
                     (line.PointA + positive * line.Direction, positive),
                     (line.PointA + negative * line.Direction, negative)
-                }.Where(x => x.Item2 > 0).Where(x => Math.Abs(x.Item2) > 0.00005).Where(x => InsideTheCylinder(x.Item1))
+                }.Where(x => x.Item2 > 0.00005).Where(x => InsideTheCylinder(x.Item1))
                 .ToList();
-
-            var distance = result.Select(x => baseLine.DistanceFrom(x.Item1)).ToList().FirstOrDefault();
 
             return (result, this);
         }
