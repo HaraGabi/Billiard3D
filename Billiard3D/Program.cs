@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Billiard3D.Track;
 using Billiard3D.VectorMath;
 using JetBrains.Annotations;
@@ -12,17 +14,37 @@ namespace Billiard3D
     {
         private static Vector3D ChosenPoint { get; } = (320d, 0d, 0d);
 
-        private static Vector3D InitialVelocity { get; } = (1d, 1d, 1d);
-
+        [UsedImplicitly]
         public static void Main(string[] args)
         {
-            var room = TrackFactory.RoomWithPlaneRoof(0.5);
-            room.Start(CreateStartingPoint());
-
-            WriteToFile(room, false, ChosenPoint.ToString(), InitialVelocity.ToString());
+            Parallel.For(1, 41, (index, state) =>
+            {
+                var radius = index * 0.5;
+                foreach (var startingPoint in CreateStartingPoints())
+                {
+                    var room = TrackFactory.RoomWithPlaneRoof(radius);
+                    room.Start(startingPoint);
+                    WriteToFile(room, false, startingPoint.PointA.ToString(), startingPoint.Direction.ToString());
+                }
+            });
         }
 
-        private static Line CreateStartingPoint() => Line.FromPointAndDirection(ChosenPoint, InitialVelocity);
+        private static IEnumerable<Line> CreateStartingPoints()
+        {
+            var result = new List<Line>();
+            var velocities = new List<Vector3D>
+            {
+                (0, 0, 1),
+                (0, 1, 0),
+                (0, 1, 1),
+                (1, 0, 0),
+                (1, 0, 1),
+                (1, 1, 0),
+                (1, 1, 1)
+            };
+            result.AddRange(velocities.Select(x => Line.FromPointAndDirection(ChosenPoint, x)));
+            return result;
+        }
 
         private static void WriteToFile(Room finished, bool isTilted, string startingPoint, string startingVelocity)
         {
@@ -35,7 +57,7 @@ namespace Billiard3D
             {
                 var name = trackObject.ObjectName + ".txt";
                 var fullPath = directory + name;
-                File.WriteAllLines(fullPath,trackObject.HitPoints.Select(x => x.ToString()));
+                File.WriteAllLines(fullPath, trackObject.HitPoints.Select(x => x.ToString()));
             }
 
             var metaDataName = directory + @"\StartingParameters.txt";
