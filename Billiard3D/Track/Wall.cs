@@ -86,6 +86,8 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
+        public string ObjectName { get; set; }
+
         private bool CheckIfPointIsOnThePlain((double x, double y, double z) point)
         {
             const double confidence = 0.000001;

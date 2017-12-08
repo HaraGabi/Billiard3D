@@ -86,6 +86,8 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
+        public string ObjectName { get; set; }
+
         private bool InsideTheCylinder(Vector3D point)
         {
             var baseLine = new Line(TopCenter, BottomCenter);

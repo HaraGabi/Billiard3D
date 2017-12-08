@@ -62,6 +62,8 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
+        public string ObjectName { get; set; }
+
         public override bool Equals(object obj)
         {
             if (obj is null) return false;
