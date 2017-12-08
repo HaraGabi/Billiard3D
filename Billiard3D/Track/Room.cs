@@ -31,12 +31,12 @@ namespace Billiard3D.Track
             var previous = new List<ITrackObject>();
             for (var i = 0; i < NumberOfIterations; i++)
             {
-                var hitPoints = Objects.Select(x => x.GetIntersectionPoints(currentLine, DiscardMode.DiscardBackWards)).Where(x => x.Item1.Any()).ToList();
-                var hittedWall = hitPoints.Where(x => x.Item2 is Wall && x.Item1.Any()).OrderBy(x => x.Item1.Min(y => y.Item2)).First();
+                var hitPoints = Objects.Select(x => x.GetIntersectionPoints(currentLine)).Where(x => x.Item1.Any()).ToList();
+                var hittedWall = hitPoints.Where(x => x.Item2 is Wall && x.Item1.Any()).OrderBy(x => x.Item1.Min(y => y.Item2)).FirstOrDefault();
 
-                var hitPoint = hittedWall.Item1.First().Item1;
-                var wall = hittedWall.Item2 as Wall ?? throw new InvalidOperationException();
-                if (wall.WallLines.Any(x => x.DistanceFrom(hitPoint) < MinimumWallDistance))
+                var hitPoint = hittedWall.Item1?.First().Item1;
+                var wall = hittedWall.Item2 as Wall;
+                if (hitPoint is null || (wall?.WallLines.Any(x => x.DistanceFrom(hitPoint) < MinimumWallDistance) ?? false))
                 {
                     var hittedSphere = hitPoints.FirstOrDefault(x => x.Item2 is Sphere);
                     if (hittedSphere.Item2 is null)

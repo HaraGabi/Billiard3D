@@ -45,16 +45,44 @@ namespace Billiard3D.Track
             }
             // todo: specifics
             var distance = (Corners.First() - line.PointA) * NormalVector / (line.Direction * NormalVector);
-            return (new[] {(line.PointA + distance * line.Direction, distance)}, this);
+            var hitPoint = new List<(Vector3D, double)> { (line.PointA + distance * line.Direction, distance) };
+            hitPoint = hitPoint.Where(x => x.Item2 > 0).Where(x => OnTheWall(x.Item1)).ToList();
+
+            return (hitPoint, this);
         }
 
-        public Line LineAfterHit(Line incoming, Vector3D hittedPoint)
+        private bool OnTheWall(Vector3D hitPoint)
         {
-            HittedPoints.Add(hittedPoint);
+            bool inBetween = true;
+            for (var i = 0; i < WallLines.Count; ++i)
+            {
+                var otherSideIndex = i + 2;
+                if (otherSideIndex >= WallLines.Count)
+                {
+                    otherSideIndex -= WallLines.Count;
+                }
+                var otherSide = WallLines[otherSideIndex];
+
+                var currentProjection = WallLines[i].ClosestPoint(hitPoint);
+                var otherProjection = otherSide.ClosestPoint(hitPoint);
+
+                var planeDistnace = AbsoluteValue(otherProjection - currentProjection);
+                var distanceFromOther = AbsoluteValue(otherProjection - hitPoint);
+                var distanceFromCurrent = AbsoluteValue(currentProjection - hitPoint);
+
+                var between = Math.Abs((distanceFromCurrent + distanceFromOther) - planeDistnace) < Confidence;
+                inBetween = inBetween && between;
+            }
+            return inBetween;
+        }
+
+        public Line LineAfterHit(Line incoming, Vector3D hitPoint)
+        {
+            HittedPoints.Add(hitPoint);
             // todo: specifics
             var newDirection = 2 * (-1 * incoming.Direction.Normalize() * NormalVector) * NormalVector +
                                incoming.Direction.Normalize();
-            return Line.FromPointAndDirection(hittedPoint, newDirection);
+            return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
         private bool CheckIfPointIsOnThePlain((double x, double y, double z) point)

@@ -40,25 +40,26 @@ namespace Billiard3D.Track
             var minus = -(lineDir * (line.PointA - Center)) - Sqrt(discriminant);
             if (discriminant < 0.000005)
             {
-                return (new List<(Vector3D, double)> {(line.PointA + plus * line.Direction, plus)}, this);
+                var result = plus > 0 ? new List<(Vector3D, double)> { (line.PointA + plus * line.Direction, plus) } : Enumerable.Empty<(Vector3D, double)>();
+                return (result, this);
             }
             var results = new List<(Vector3D, double)>
             {
                 (line.PointA + plus * line.Direction, plus),
                 (line.PointA + minus * line.Direction, minus)
-            };
+            }.Where(x => x.Item2 > 0);
             return (results, this);
         }
         //
-        public Line LineAfterHit(Line incoming, Vector3D hittedPoint)
+        public Line LineAfterHit(Line incoming, Vector3D hitPoint)
         {
-            HittedPoints.Add(hittedPoint);
-            var line = new Line(Center, hittedPoint);
+            HittedPoints.Add(hitPoint);
+            var line = new Line(Center, hitPoint);
             var normalVector = -1 * line.Direction.Normalize();
 
             var newDirection = 2 * (-1 * incoming.Direction.Normalize() * normalVector) * normalVector +
                                incoming.Direction.Normalize();
-            return Line.FromPointAndDirection(hittedPoint, newDirection);
+            return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
         public override bool Equals(object obj)

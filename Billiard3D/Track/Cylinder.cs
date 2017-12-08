@@ -9,20 +9,20 @@ namespace Billiard3D.Track
 {
     internal class Cylinder : ITrackObject, IEquatable<Cylinder>, IEnumerable<Vector3D>
     {
-        public Cylinder([NotNull] Vector3D top, [NotNull] Vector3D bottom, double radius)
-        {
-            Radius = radius;
-            TopCenter = top ?? throw new ArgumentNullException(nameof(top));
-            BottomCenter = bottom ?? throw new ArgumentNullException(nameof(bottom));
-        }
-
         public double Radius { get; }
 
         public Vector3D TopCenter { get; }
 
         public Vector3D BottomCenter { get; }
 
-        public List<Vector3D> HittedPoints { get; } = new List<Vector3D>();
+        public List<Vector3D> HitPoints { get; } = new List<Vector3D>();
+
+        public Cylinder([NotNull] Vector3D top, [NotNull] Vector3D bottom, double radius)
+        {
+            Radius = radius;
+            TopCenter = top ?? throw new ArgumentNullException(nameof(top));
+            BottomCenter = bottom ?? throw new ArgumentNullException(nameof(bottom));
+        }
 
         public IEnumerator<Vector3D> GetEnumerator()
         {
@@ -43,7 +43,6 @@ namespace Billiard3D.Track
         ///     Gets the necessary coefficient for the line to reach cylinder
         /// </summary>
         /// <param name="line"></param>
-        /// <param name="discardMode"></param>
         /// <returns></returns>
         public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line)
         {
@@ -62,28 +61,43 @@ namespace Billiard3D.Track
             var b = 2 * (kisA * kisC);
             var c = kisC * kisC - Math.Pow(Radius, 2);
 
-            var positive = (-b + Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / 2 * a;
-            var negative = (-b - Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / 2 * a;
+            var positive = (-b + Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / (2 * a);
+            var negative = (-b - Math.Sqrt(Math.Pow(b, 2) + 4 * a * c)) / (2 * a);
 
             var result = new List<(Vector3D, double)>
-            {
-                (line.PointA + positive * line.Direction, positive),
-                (line.PointA + negative * line.Direction, negative)
-            };
+                {
+                    (line.PointA + positive * line.Direction, positive),
+                    (line.PointA + negative * line.Direction, negative)
+                }.Where(x => x.Item2 > 0).Where(x => Math.Abs(x.Item2) > 0.00005).Where(x => InsideTheCylinder(x.Item1))
+                .ToList();
+
+            var distance = result.Select(x => baseLine.DistanceFrom(x.Item1)).ToList().FirstOrDefault();
 
             return (result, this);
         }
 
-        public Line LineAfterHit(Line incoming, Vector3D hittedPoint)
+        public Line LineAfterHit(Line incoming, Vector3D hitPoint)
         {
-            HittedPoints.Add(hittedPoint);
+            HitPoints.Add(hitPoint);
             var baseLine = new Line(TopCenter, BottomCenter);
-            var line = new Line(baseLine.ClosestPoint(hittedPoint), hittedPoint);
-            var normalVector = - 1 * line.Direction.Normalize();
+            var line = new Line(baseLine.ClosestPoint(hitPoint), hitPoint);
+            var normalVector = -1 * line.Direction.Normalize();
 
             var newDirection = 2 * (-1 * incoming.Direction.Normalize() * normalVector) * normalVector +
                                incoming.Direction.Normalize();
-            return Line.FromPointAndDirection(hittedPoint, newDirection);
+            return Line.FromPointAndDirection(hitPoint, newDirection);
+        }
+
+        private bool InsideTheCylinder(Vector3D point)
+        {
+            var baseLine = new Line(TopCenter, BottomCenter);
+            var projectedPoint = baseLine.ClosestPoint(point);
+
+            var cylinderHeight = Vector3D.AbsoluteValue(BottomCenter - TopCenter);
+            var distanceFromTop = Vector3D.AbsoluteValue(projectedPoint - TopCenter);
+            var distanceFromBottom = Vector3D.AbsoluteValue(projectedPoint - BottomCenter);
+
+            return Math.Abs(distanceFromBottom + distanceFromTop - cylinderHeight) < 0.00005;
         }
 
         public override bool Equals(object obj)
