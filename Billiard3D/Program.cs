@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Billiard3D.Track;
 using Billiard3D.VectorMath;
@@ -6,9 +7,6 @@ using JetBrains.Annotations;
 
 namespace Billiard3D
 {
-    using System.IO;
-    using System.Threading.Tasks;
-
     [UsedImplicitly]
     public class Programs
     {
@@ -19,33 +17,34 @@ namespace Billiard3D
         public static void Main(string[] args)
         {
             var room = TrackFactory.RoomWithPlaneRoof(0.5);
-            var objects = room.Start(CreateStartingPoint());
+            room.Start(CreateStartingPoint());
 
-            var sequence = room.HitSequence;
-            Console.WriteLine("Finished");
-            Console.ReadKey();
-            WriteToFile(room, false);
-            Console.ReadKey();
+            WriteToFile(room, false, ChosenPoint.ToString(), InitialVelocity.ToString());
         }
 
         private static Line CreateStartingPoint() => Line.FromPointAndDirection(ChosenPoint, InitialVelocity);
 
-        private static void WriteToFile(Room finished, bool isTilted)
+        private static void WriteToFile(Room finished, bool isTilted, string startingPoint, string startingVelocity)
         {
             var rootDir = isTilted ? "Tilted" : "Common";
-            var directory = $@"{rootDir}\{finished.Radius}\";
+            rootDir += $@"\StartPoint {startingPoint} startVelocity {startingVelocity}";
+            var directory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) +
+                            $@"\{rootDir}\{finished.Radius}\";
+            Directory.CreateDirectory(directory);
             foreach (var trackObject in finished.Objects)
             {
                 var name = trackObject.ObjectName + ".txt";
                 var fullPath = directory + name;
-                using (var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write))
-                {
-                    using (var writer = new StreamWriter(fileStream))
-                    {
-                        trackObject.HitPoints.ForEach(x => writer.WriteLine(x));
-                    }
-                }
+                File.WriteAllLines(fullPath,trackObject.HitPoints.Select(x => x.ToString()));
             }
+
+            var metaDataName = directory + @"\StartingParameters.txt";
+            var sequenceDataName = directory + @"\Sequence.txt";
+
+            var newStartFormat = startingPoint.Trim('{', '}');
+            var newStartVelocity = startingVelocity.Trim('{', '}');
+            File.WriteAllLines(metaDataName, new[] {newStartFormat, newStartVelocity});
+            File.WriteAllLines(sequenceDataName, finished.HitSequence);
         }
     }
 }

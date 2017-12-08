@@ -3,23 +3,26 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using JetBrains.Annotations;
 using static System.Math;
 
 namespace Billiard3D.VectorMath
 {
-    using JetBrains.Annotations;
-
     [DebuggerDisplay("({X}; {Y}; {Z})")]
     internal class Vector3D : IEnumerable<double>, IComparable<Vector3D>, IEquatable<Vector3D>
     {
-        public Vector3D(double x, double y, double z)
+        public double X { get; }
+        public double Y { get; }
+        public double Z { get; }
+
+        private Vector3D(double x, double y, double z)
         {
             X = x;
             Y = y;
             Z = z;
         }
 
-        public Vector3D(IEnumerable<double> coll)
+        private Vector3D(IEnumerable<double> coll)
         {
             var doubles = coll as double[] ?? coll.ToArray();
             if (doubles.Length != 3)
@@ -28,10 +31,6 @@ namespace Billiard3D.VectorMath
             Y = doubles[1];
             Z = doubles[2];
         }
-
-        public double X { get; }
-        public double Y { get; }
-        public double Z { get; }
 
         public int CompareTo(Vector3D other)
         {
@@ -171,7 +170,7 @@ namespace Billiard3D.VectorMath
             return (a, b, c);
         }
 
-        public static bool IsNullVector(Vector3D vector) => vector.All(x => Abs(x) <= double.Epsilon);
+        private static bool IsNullVector(Vector3D vector) => vector.All(x => Abs(x) <= double.Epsilon);
 
         public Vector3D Normalize() => this / AbsoluteValue(this);
 
@@ -188,7 +187,5 @@ namespace Billiard3D.VectorMath
     public static class DoubleExtensions
     {
         public static double ToRadian(this double degree) => PI * degree / 180.0;
-
-        public static double ToDegree(this double radian) => radian * (180.0 / PI);
     }
 }

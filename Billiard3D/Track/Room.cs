@@ -8,6 +8,16 @@ namespace Billiard3D.Track
 {
     internal class Room
     {
+        public double Radius { get; }
+
+        public List<ITrackObject> Objects { get; } = new List<ITrackObject>(24);
+
+        private int NumberOfIterations { get; } = 10_000_000;
+
+        public List<string> HitSequence { get; } = new List<string>(10_000_000);
+
+        private double MinimumWallDistance { get; set; }
+
         public Room([NotNull] IEnumerable<Wall> walls, double radius = 0.003)
         {
             if (walls == null) throw new ArgumentNullException(nameof(walls));
@@ -21,28 +31,21 @@ namespace Billiard3D.Track
             CreateSpheres(radius);
         }
 
-        public double Radius { get; }
-
-        public List<ITrackObject> Objects { get; set; } = new List<ITrackObject>();
-
-        public int NumberOfIterations { get; set; } = 3_000_000;
-
-        public List<string> HitSequence { get; } = new List<string>();
-
-        private double MinimumWallDistance { get; set; }
-
-        public IEnumerable<ITrackObject> Start(Line startLine)
+        public void Start(Line startLine)
         {
             var currentLine = startLine;
             for (var i = 0; i < NumberOfIterations; i++)
             {
-                var hitPoints = Objects.Select(x => x.GetIntersectionPoints(currentLine)).Where(x => x.Item1.Any()).ToList();
-                var hittedWall = hitPoints.Where(x => x.Item2 is Wall && x.Item1.Any()).OrderBy(x => x.Item1.Min(y => y.Item2)).FirstOrDefault();
+                var hitPoints = Objects.Select(x => x.GetIntersectionPoints(currentLine)).Where(x => x.Item1.Any())
+                    .ToList();
+                var hittedWall = hitPoints.Where(x => x.Item2 is Wall && x.Item1.Any())
+                    .OrderBy(x => x.Item1.Min(y => y.Item2)).FirstOrDefault();
 
                 var hitPoint = hittedWall.Item1?.First().Item1;
                 var wall = hittedWall.Item2 as Wall;
                 ITrackObject previous;
-                if (hitPoint is null || (wall?.WallLines.Any(x => x.DistanceFrom(hitPoint) < MinimumWallDistance) ?? false))
+                if (hitPoint is null ||
+                    (wall?.WallLines.Any(x => x.DistanceFrom(hitPoint) < MinimumWallDistance) ?? false))
                 {
                     var hittedSphere = hitPoints.FirstOrDefault(x => x.Item2 is Sphere);
                     if (hittedSphere.Item2 is null)
@@ -68,12 +71,11 @@ namespace Billiard3D.Track
                 }
                 HitSequence.Add(previous.ObjectName);
             }
-            return Objects;
         }
 
         private void CreateCylinders(double radius)
         {
-            var cylinders = new List<Cylinder>();
+            var cylinders = new List<Cylinder>(12);
             foreach (var track in Objects)
             {
                 var wall = track as Wall ?? throw new ArgumentNullException(nameof(Objects));
@@ -99,7 +101,8 @@ namespace Billiard3D.Track
                     var cylinder = CalculateCylinder(topLine, otherTopLine, wallLine, radius);
                     if (cylinders.Exists(x => x.Contains(cylinder.TopCenter) && x.Contains(cylinder.BottomCenter)))
                         continue;
-                    cylinder.ObjectName = "Cylinder" + $"Top: {cylinder.TopCenter}" + $"Bottom: {cylinder.BottomCenter}";
+                    cylinder.ObjectName =
+                        "Cylinder" + $" Top {cylinder.TopCenter}" + $" Bottom {cylinder.BottomCenter}";
                     cylinders.Add(cylinder);
                 }
             }
@@ -109,7 +112,7 @@ namespace Billiard3D.Track
         private void CreateSpheres(double radius)
         {
             var cylinders = Objects.Where(x => x is Cylinder).Cast<Cylinder>();
-            var spheres = new List<Sphere>();
+            var spheres = new List<Sphere>(8);
             foreach (var cylinder in cylinders)
             {
                 var lineA = new Line(cylinder.TopCenter, cylinder.BottomCenter);
@@ -119,13 +122,13 @@ namespace Billiard3D.Track
                 var sphereB = new Sphere(lineB.GetPointOnLine(radius), radius);
                 if (!spheres.Exists(x => x.Center == sphereA.Center))
                 {
-                    sphereA.ObjectName = "Sphere" + $"Center: {sphereA.Center}";
+                    sphereA.ObjectName = "Sphere" + $" Center {sphereA.Center}";
                     spheres.Add(sphereA);
                 }
 
                 if (!spheres.Exists(x => x.Center == sphereB.Center))
                 {
-                    sphereB.ObjectName = "Sphere" + $"Center: {sphereB.Center}";
+                    sphereB.ObjectName = "Sphere" + $" Center {sphereB.Center}";
                     spheres.Add(sphereB);
                 }
             }

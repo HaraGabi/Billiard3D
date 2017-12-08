@@ -8,16 +8,14 @@ namespace Billiard3D.Track
 {
     internal class Sphere : ITrackObject, IEquatable<Sphere>
     {
+        public Vector3D Center { get; }
+        private double Radius { get; }
+
         public Sphere(Vector3D center, double radius)
         {
             Center = center;
             Radius = radius;
         }
-
-        public Vector3D Center { get; }
-        public double Radius { get; }
-
-        public List<Vector3D> HitPoints { get; } = new List<Vector3D>();
 
         public bool Equals(Sphere other)
         {
@@ -25,6 +23,8 @@ namespace Billiard3D.Track
             if (ReferenceEquals(this, other)) return true;
             return Equals(Center, other.Center) && Radius.Equals(other.Radius);
         }
+
+        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10_000_000);
 
         public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line)
         {
@@ -40,7 +40,9 @@ namespace Billiard3D.Track
             var minus = -(lineDir * (line.PointA - Center)) - Sqrt(discriminant);
             if (discriminant < 0.000005)
             {
-                var result = plus > 0 ? new List<(Vector3D, double)> { (line.PointA + plus * line.Direction, plus) } : Enumerable.Empty<(Vector3D, double)>();
+                var result = plus > 0
+                    ? new List<(Vector3D, double)> {(line.PointA + plus * line.Direction, plus)}
+                    : Enumerable.Empty<(Vector3D, double)>();
                 return (result, this);
             }
             var results = new List<(Vector3D, double)>
@@ -50,6 +52,7 @@ namespace Billiard3D.Track
             }.Where(x => x.Item2 > 0.00005);
             return (results, this);
         }
+
         //
         public Line LineAfterHit(Line incoming, Vector3D hitPoint)
         {

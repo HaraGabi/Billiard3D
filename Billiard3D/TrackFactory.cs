@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Billiard3D.Track;
+using Billiard3D.VectorMath;
 
 namespace Billiard3D
 {
-    using Billiard3D.Track;
-    using Billiard3D.VectorMath;
-
     internal static class TrackFactory
     {
         public static Room RoomWithPlaneRoof(double radius)
@@ -25,14 +21,17 @@ namespace Billiard3D
             var secondLeftBottom = (distance, width, 0d);
             var secondLeftTop = (distance, width, height);
 
-            var frontWall = new Wall(new Vector3D[] { firstRightBottom, firstRightTop, firstLeftTop, firstLeftBottom });
-            var oppositeWall = new Wall(new Vector3D[] { secondRightBottom, secondRightTop, secondLeftTop, secondLeftBottom });
-            var rightWall = new Wall(new Vector3D[] { firstRightBottom, secondRightBottom, secondRightTop, firstRightTop });
-            var leftWall = new Wall(new Vector3D[] { firstLeftBottom, secondLeftBottom, secondLeftTop, firstLeftTop });
-            var roof = new Wall(new Vector3D[] { firstRightTop, secondRightTop, secondLeftTop, firstLeftTop });
-            var floor = new Wall(new Vector3D[] { firstRightBottom, secondRightBottom, secondLeftBottom, firstLeftBottom });
+            var frontWall = new Wall(new Vector3D[] {firstRightBottom, firstRightTop, firstLeftTop, firstLeftBottom});
+            var oppositeWall = new Wall(new Vector3D[]
+                {secondRightBottom, secondRightTop, secondLeftTop, secondLeftBottom});
+            var rightWall =
+                new Wall(new Vector3D[] {firstRightBottom, secondRightBottom, secondRightTop, firstRightTop});
+            var leftWall = new Wall(new Vector3D[] {firstLeftBottom, secondLeftBottom, secondLeftTop, firstLeftTop});
+            var roof = new Wall(new Vector3D[] {firstRightTop, secondRightTop, secondLeftTop, firstLeftTop});
+            var floor = new Wall(
+                new Vector3D[] {firstRightBottom, secondRightBottom, secondLeftBottom, firstLeftBottom});
 
-            return new Room(new[] { frontWall, oppositeWall, rightWall, leftWall, roof, floor }, radius);
+            return new Room(new[] {frontWall, oppositeWall, rightWall, leftWall, roof, floor}, radius);
         }
 
         public static Room RoomWithTiltedRoof(double radius)
@@ -52,14 +51,17 @@ namespace Billiard3D
             var secondLeftBottom = (distance, width, 0d);
             var secondLeftTop = (distance, width, height1);
 
-            var frontWall = new Wall(new Vector3D[] { firstRightBottom, firstRightTop, firstLeftTop, firstLeftBottom });
-            var oppositeWall = new Wall(new Vector3D[] { secondRightBottom, secondRightTop, secondLeftTop, secondLeftBottom });
-            var rightWall = new Wall(new Vector3D[] { firstRightBottom, secondRightBottom, secondRightTop, firstRightTop });
-            var leftWall = new Wall(new Vector3D[] { firstLeftBottom, secondLeftBottom, secondLeftTop, firstLeftTop });
-            var roof = new Wall(new Vector3D[] { firstRightTop, secondRightTop, secondLeftTop, firstLeftTop });
-            var floor = new Wall(new Vector3D[] { firstRightBottom, secondRightBottom, secondLeftBottom, firstLeftBottom });
+            var frontWall = new Wall(new Vector3D[] {firstRightBottom, firstRightTop, firstLeftTop, firstLeftBottom});
+            var oppositeWall = new Wall(new Vector3D[]
+                {secondRightBottom, secondRightTop, secondLeftTop, secondLeftBottom});
+            var rightWall =
+                new Wall(new Vector3D[] {firstRightBottom, secondRightBottom, secondRightTop, firstRightTop});
+            var leftWall = new Wall(new Vector3D[] {firstLeftBottom, secondLeftBottom, secondLeftTop, firstLeftTop});
+            var roof = new Wall(new Vector3D[] {firstRightTop, secondRightTop, secondLeftTop, firstLeftTop});
+            var floor = new Wall(
+                new Vector3D[] {firstRightBottom, secondRightBottom, secondLeftBottom, firstLeftBottom});
 
-            return new Room(new[] { frontWall, oppositeWall, rightWall, leftWall, roof, floor }, radius);
+            return new Room(new[] {frontWall, oppositeWall, rightWall, leftWall, roof, floor}, radius);
         }
     }
 }

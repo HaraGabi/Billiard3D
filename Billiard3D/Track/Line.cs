@@ -8,16 +8,16 @@ namespace Billiard3D.Track
 {
     internal class Line : IEquatable<Line>, IEnumerable<Vector3D>
     {
+        public Vector3D PointB { get; }
+        public Vector3D PointA { get; }
+        public Vector3D Direction { get; }
+
         public Line([NotNull] Vector3D pointA, [NotNull] Vector3D pointB)
         {
             PointB = pointB ?? throw new ArgumentNullException(nameof(pointB));
             PointA = pointA ?? throw new ArgumentNullException(nameof(pointA));
             Direction = (PointB - PointA).Normalize();
         }
-
-        public Vector3D PointB { get; }
-        public Vector3D PointA { get; }
-        public Vector3D Direction { get; }
 
         public IEnumerator<Vector3D> GetEnumerator()
         {

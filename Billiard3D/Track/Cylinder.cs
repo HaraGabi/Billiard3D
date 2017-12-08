@@ -9,13 +9,11 @@ namespace Billiard3D.Track
 {
     internal class Cylinder : ITrackObject, IEquatable<Cylinder>, IEnumerable<Vector3D>
     {
-        public double Radius { get; }
+        private double Radius { get; }
 
         public Vector3D TopCenter { get; }
 
         public Vector3D BottomCenter { get; }
-
-        public List<Vector3D> HitPoints { get; } = new List<Vector3D>();
 
         public Cylinder([NotNull] Vector3D top, [NotNull] Vector3D bottom, double radius)
         {
@@ -38,6 +36,8 @@ namespace Billiard3D.Track
             if (ReferenceEquals(this, other)) return true;
             return Radius.Equals(other.Radius) && this.Contains(other.TopCenter) && this.Contains(other.BottomCenter);
         }
+
+        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10_000_000);
 
         /// <summary>
         ///     Gets the necessary coefficient for the line to reach cylinder
