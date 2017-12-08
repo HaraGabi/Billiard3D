@@ -9,24 +9,15 @@ namespace Billiard3D
     [UsedImplicitly]
     public class Programs
     {
-        internal static Line RandomStarter(int max)
-        {
-            var random = new Random();
-            var startLocation = (random.Next(max), random.Next(max), random.Next(max));
-            var startDirection = (random.Next(max), random.Next(max), random.Next(max));
-            return Line.FromPointAndDirection(startLocation, startDirection);
-        }
+        internal static Vector3D ChosenPoint { get; } = (320d, 0d, 0d);
 
         public static void Main(string[] args)
         {
-            var rightWall = new Wall(new Vector3D[] {(0, 0, 0), (300, 0, 0), (300, 0, 300), (0, 0, 300)});
-            var leftFal = new Wall(new Vector3D[] {(0, 300, 0), (300, 300, 0), (300, 300, 300), (0, 300, 300)});
-            var backWall = new Wall(new Vector3D[] {(0, 0, 0), (0, 300, 0), (0, 300, 300), (0, 0, 300)});
-            var frontWall = new Wall(new Vector3D[] {(300, 0, 0), (300, 0, 300), (300, 300, 300), (300, 300, 0)});
-            var roof = new Wall(new Vector3D[] {(0, 0, 300), (0, 300, 300), (300, 300, 300), (300, 0, 300)});
-            var floor = new Wall(new Vector3D[] {(0, 0, 0), (0, 300, 0), (300, 300, 0), (300, 0, 0)});
-            var room = new Room(new[] {rightWall, leftFal, backWall, frontWall, roof, floor}, 0.5);
-            var objects = room.Start(RandomStarter(150));
+            var room = TrackFactory.RoomWithPlaneRoof(0.5);
+            var objects = room.Start(Line.FromPointAndDirection(ChosenPoint, (1d, 1d, 1d)));
+
+            var sequence = room.HitSequence;
+            Console.ReadKey();
         }
     }
 }
