@@ -46,7 +46,7 @@ namespace Billiard3D.Track
             // todo: specifics
             var distance = (Corners.First() - line.PointA) * NormalVector / (line.Direction * NormalVector);
             var hitPoint = new List<(Vector3D, double)> { (line.PointA + distance * line.Direction, distance) };
-            hitPoint = hitPoint.Where(x => x.Item2 > 0.00005).Where(x => OnTheWall(x.Item1)).ToList();
+            hitPoint = hitPoint.Where(x => x.Item2 > Confidence).Where(x => OnTheWall(x.Item1)).ToList();
 
             return (hitPoint, this);
         }
@@ -61,9 +61,17 @@ namespace Billiard3D.Track
             var minY = Corners.Min(x => x.Y);
             var minZ = Corners.Min(x => x.Z);
 
-            var forX = (hitPoint.X <= maxX) && (hitPoint.X >= minX);
-            var forY = (hitPoint.Y <= maxY) && (hitPoint.Y >= minY);
-            var forZ = (hitPoint.Z <= maxZ) && (hitPoint.Z >= minZ);
+            var smallerThanMaxX = (hitPoint.X < maxX) || (Math.Abs(hitPoint.X - maxX) < Confidence);
+            var smallerThanMaxY = (hitPoint.Y < maxY) || (Math.Abs(hitPoint.Y - maxY) < Confidence);
+            var smallerThanMaxZ = (hitPoint.Z < maxZ) || (Math.Abs(hitPoint.Z - maxZ) < Confidence);
+
+            var biggerThanMinX = (hitPoint.X > minX) || (Math.Abs(hitPoint.X - minX) < Confidence);
+            var biggerThanMinY = (hitPoint.Y > minY) || (Math.Abs(hitPoint.Y - minY) < Confidence);
+            var biggerThanMinZ = (hitPoint.Z > minZ) || (Math.Abs(hitPoint.Z - minZ) < Confidence);
+
+            var forX = smallerThanMaxX && biggerThanMinX;
+            var forY = smallerThanMaxY && biggerThanMinY;
+            var forZ = smallerThanMaxZ && biggerThanMinZ;
 
             var inBetween = forX && forY && forZ;
             return inBetween;

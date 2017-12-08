@@ -21,7 +21,7 @@ namespace Billiard3D.Track
 
         public List<ITrackObject> Objects { get; set; } = new List<ITrackObject>();
 
-        public int NumberOfIterations { get; set; } = 10_000;
+        public int NumberOfIterations { get; set; } = int.MaxValue;
 
         private double MinimumWallDistance { get; set; }
 
