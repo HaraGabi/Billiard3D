@@ -33,7 +33,7 @@ namespace Billiard3D.Track
         public List<Vector3D> Corners { get; set; } = new List<Vector3D>();
         public List<Line> WallLines { get; } = new List<Line>(4);
         public Vector3D NormalVector { get; set; }
-        public List<Vector3D> HittedPoints { get; set; } = new List<Vector3D>();
+        public List<Vector3D> HitPoints { get; set; } = new List<Vector3D>();
 
 
         public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line)
@@ -79,7 +79,7 @@ namespace Billiard3D.Track
 
         public Line LineAfterHit(Line incoming, Vector3D hitPoint)
         {
-            HittedPoints.Add(hitPoint);
+            HitPoints.Add(hitPoint);
             // todo: specifics
             var newDirection = 2 * (-1 * incoming.Direction.Normalize() * NormalVector) * NormalVector +
                                incoming.Direction.Normalize();

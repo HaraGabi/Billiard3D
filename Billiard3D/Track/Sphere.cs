@@ -17,7 +17,7 @@ namespace Billiard3D.Track
         public Vector3D Center { get; }
         public double Radius { get; }
 
-        public List<Vector3D> HittedPoints { get; } = new List<Vector3D>();
+        public List<Vector3D> HitPoints { get; } = new List<Vector3D>();
 
         public bool Equals(Sphere other)
         {
@@ -53,7 +53,7 @@ namespace Billiard3D.Track
         //
         public Line LineAfterHit(Line incoming, Vector3D hitPoint)
         {
-            HittedPoints.Add(hitPoint);
+            HitPoints.Add(hitPoint);
             var line = new Line(Center, hitPoint);
             var normalVector = -1 * line.Direction.Normalize();
 
