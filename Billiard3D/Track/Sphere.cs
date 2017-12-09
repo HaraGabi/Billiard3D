@@ -24,7 +24,7 @@ namespace Billiard3D.Track
             return Equals(Center, other.Center) && Radius.Equals(other.Radius);
         }
 
-        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10_000_000);
+        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10);
 
         public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line)
         {

@@ -34,7 +34,7 @@ namespace Billiard3D.Track
             }
         }
 
-        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10_000_000);
+        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(100_000);
 
         public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line)
         {

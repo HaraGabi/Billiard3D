@@ -37,7 +37,7 @@ namespace Billiard3D.Track
             return Radius.Equals(other.Radius) && this.Contains(other.TopCenter) && this.Contains(other.BottomCenter);
         }
 
-        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10_000_000);
+        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(1000);
 
         /// <summary>
         ///     Gets the necessary coefficient for the line to reach cylinder
@@ -68,7 +68,7 @@ namespace Billiard3D.Track
                 {
                     (line.PointA + positive * line.Direction, positive),
                     (line.PointA + negative * line.Direction, negative)
-                }.Where(x => x.Item2 > 0.00005).Where(x => InsideTheCylinder(x.Item1))
+                }.Where(x => x.Item2 > 0).Where(x => InsideTheCylinder(x.Item1))
                 .ToList();
 
             return (result, this);
@@ -97,7 +97,7 @@ namespace Billiard3D.Track
             var distanceFromTop = Vector3D.AbsoluteValue(projectedPoint - TopCenter);
             var distanceFromBottom = Vector3D.AbsoluteValue(projectedPoint - BottomCenter);
 
-            return Math.Abs(distanceFromBottom + distanceFromTop - cylinderHeight) < 0.00005;
+            return Math.Abs(distanceFromBottom + distanceFromTop - cylinderHeight) < 0.1;
         }
 
         public override bool Equals(object obj)
