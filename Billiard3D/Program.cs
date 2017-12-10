@@ -30,9 +30,9 @@ namespace Billiard3D
                 foreach (var startingPoint in CreateStartingPoints())
                     try
                     {
-                        var room = TrackFactory.RoomWithTiltedRoof(radius);
+                        var room = TrackFactory.RoomWithPlaneRoof(radius);
                         room.Start(startingPoint);
-                        WriteToFile(room, true, startingPoint.PointA.ToString(), startingPoint.Direction.ToString());
+                        WriteToFile(room, false, startingPoint.PointA.ToString(), startingPoint.Direction.ToString());
                     }
                     catch (Exception)
                     {
