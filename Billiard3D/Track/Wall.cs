@@ -18,7 +18,7 @@ namespace Billiard3D.Track
 
         private List<Vector3D> Corners { get; } = new List<Vector3D>(4);
         public List<Line> WallLines { get; } = new List<Line>(4);
-        public Vector3D NormalVector { get; }
+        public Vector3D NormalVector { get; set; }
 
         public Wall(IEnumerable<Vector3D> corners)
         {

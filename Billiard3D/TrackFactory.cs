@@ -21,15 +21,36 @@ namespace Billiard3D
             var secondLeftBottom = (distance, width, 0d);
             var secondLeftTop = (distance, width, height);
 
-            var frontWall = new Wall(new Vector3D[] {firstRightBottom, firstRightTop, firstLeftTop, firstLeftBottom});
-            var oppositeWall = new Wall(new Vector3D[]
-                {secondRightBottom, secondRightTop, secondLeftTop, secondLeftBottom});
+            var frontWall =
+                new Wall(new Vector3D[] {firstRightBottom, firstRightTop, firstLeftTop, firstLeftBottom})
+                {
+                    NormalVector = (1, 0, 0)
+                };
+            var oppositeWall =
+                new Wall(new Vector3D[] {secondRightBottom, secondRightTop, secondLeftTop, secondLeftBottom})
+                {
+                    NormalVector = (-1, 0, 0)
+                };
             var rightWall =
-                new Wall(new Vector3D[] {firstRightBottom, secondRightBottom, secondRightTop, firstRightTop});
-            var leftWall = new Wall(new Vector3D[] {firstLeftBottom, secondLeftBottom, secondLeftTop, firstLeftTop});
-            var roof = new Wall(new Vector3D[] {firstRightTop, secondRightTop, secondLeftTop, firstLeftTop});
-            var floor = new Wall(
-                new Vector3D[] {firstRightBottom, secondRightBottom, secondLeftBottom, firstLeftBottom});
+                new Wall(new Vector3D[] {firstRightBottom, secondRightBottom, secondRightTop, firstRightTop})
+                {
+                    NormalVector = (0, 1, 0)
+                };
+            var leftWall =
+                new Wall(new Vector3D[] {firstLeftBottom, secondLeftBottom, secondLeftTop, firstLeftTop})
+                {
+                    NormalVector = (0, -1, 0)
+                };
+            var roof =
+                new Wall(new Vector3D[] {firstRightTop, secondRightTop, secondLeftTop, firstLeftTop})
+                {
+                    NormalVector = (0, 0, -1)
+                };
+            var floor =
+                new Wall(new Vector3D[] {firstRightBottom, secondRightBottom, secondLeftBottom, firstLeftBottom})
+                {
+                    NormalVector = (0, 0, 1)
+                };
 
             return new Room(new[] {frontWall, oppositeWall, rightWall, leftWall, roof, floor}, radius);
         }
