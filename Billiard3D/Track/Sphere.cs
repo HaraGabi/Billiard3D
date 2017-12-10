@@ -8,6 +8,7 @@ namespace Billiard3D.Track
 {
     internal class Sphere : ITrackObject, IEquatable<Sphere>
     {
+        private const double Confidence = 0.00005;
         public Vector3D Center { get; }
         private double Radius { get; }
 
@@ -32,13 +33,10 @@ namespace Billiard3D.Track
             var discriminant = Pow(lineDir * (line.PointA - Center), 2) -
                                Pow(Vector3D.AbsoluteValue(line.PointA - Center), 2) + Pow(Radius, 2);
             if (discriminant < 0)
-            {
-                // no intersection
                 return (Enumerable.Empty<(Vector3D, double)>(), this);
-            }
             var plus = -(lineDir * (line.PointA - Center)) + Sqrt(discriminant);
             var minus = -(lineDir * (line.PointA - Center)) - Sqrt(discriminant);
-            if (discriminant < 0.000005)
+            if (discriminant < Confidence)
             {
                 var result = plus > 0
                     ? new List<(Vector3D, double)> {(line.PointA + plus * line.Direction, plus)}
@@ -49,7 +47,7 @@ namespace Billiard3D.Track
             {
                 (line.PointA + plus * line.Direction, plus),
                 (line.PointA + minus * line.Direction, minus)
-            }.Where(x => x.Item2 > 0.00005);
+            }.Where(x => x.Item2 > Confidence);
             return (results, this);
         }
 
