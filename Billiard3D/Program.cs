@@ -29,6 +29,7 @@ namespace Billiard3D
             {
                 var radius = index * 1.5;
                 foreach (var startingPoint in CreateStartingPoints())
+                {
                     try
                     {
                         var room = TrackFactory.RoomWithPlaneRoof(radius);
@@ -42,8 +43,14 @@ namespace Billiard3D
                             File.AppendAllLines(
                                 Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\Log.txt",
                                 new[] {$"Hiba! {radius} - {startingPoint.PointA} - {startingPoint.Direction}"});
+                            Console.WriteLine($"Error with {radius}");
                         }
                     }
+                    lock (LockObject)
+                    {
+                        Console.WriteLine($"Done with {index}");
+                    }
+                }
             });
         }
 
