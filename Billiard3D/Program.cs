@@ -14,14 +14,12 @@ namespace Billiard3D
     {
         private static readonly object LockObject = new object();
         private static Vector3D ChosenPoint { get; } = (0d, 320d, 130);
+        private static Random Rand { get; } = new Random();
 
         [UsedImplicitly]
         public static void Main(string[] args)
         {
-            //ParallelSimulation();
-            var room = TrackFactory.RoomWithPlaneRoof(6.4);
-            room.Start(Line.FromPointAndDirection((3, 320, 130), (0, 1, 1)));
-            WriteToFile(room, false, "ReSim", "reRe");
+            ParallelSimulation();
         }
 
         private static void ParallelSimulation()
@@ -29,7 +27,7 @@ namespace Billiard3D
             var options = new ParallelOptions {MaxDegreeOfParallelism = 4};
             Parallel.For(1, 41, options, (index, state) =>
             {
-                var radius = index * 0.2;
+                var radius = index * 1.5;
                 foreach (var startingPoint in CreateStartingPoints())
                     try
                     {
@@ -52,26 +50,22 @@ namespace Billiard3D
         private static IEnumerable<Line> CreateStartingPoints()
         {
             var result = new List<Line>();
-            var velocities = new List<Vector3D>
-            {
-                (0, 0, 1),
-                (0, 1, 0),
-                (0, 1, 1),
-                (1, 0, 0),
-                (1, 0, 1),
-                (1, 1, 0),
-                (1, 1, 1)
-            };
+            var velocities = new List<Vector3D>();
+            velocities.AddRange(Enumerable.Repeat(0,15).Select(x => GetRandomVector()));
             result.AddRange(velocities.Select(x => Line.FromPointAndDirection(ChosenPoint, x)));
             return result;
+        }
+
+        private static Vector3D GetRandomVector()
+        {
+            return (Rand.Next(1, 10), Rand.Next(1, 10), Rand.Next(1, 10));
         }
 
         private static void WriteToFile(Room finished, bool isTilted, string startingPoint, string startingVelocity)
         {
             var rootDir = isTilted ? "Tilted" : "Common";
             rootDir += $@"\StartPoint {startingPoint} startVelocity {startingVelocity}";
-            var directory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) +
-                            $@"\{rootDir}\{finished.Radius}\";
+            var directory = @"D:\szakdoga\adatok" + $@"\{rootDir}\{finished.Radius}\";
             Directory.CreateDirectory(directory);
             foreach (var trackObject in finished.Objects)
             {
