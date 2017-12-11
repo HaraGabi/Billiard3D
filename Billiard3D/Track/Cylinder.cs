@@ -9,6 +9,7 @@ namespace Billiard3D.Track
 {
     internal class Cylinder : ITrackObject, IEquatable<Cylinder>, IEnumerable<Vector3D>
     {
+        private double _cylinderHeight;
         private const double Confidence = 0.00005;
         private double Radius { get; }
 
@@ -21,6 +22,7 @@ namespace Billiard3D.Track
             Radius = radius;
             TopCenter = top ?? throw new ArgumentNullException(nameof(top));
             BottomCenter = bottom ?? throw new ArgumentNullException(nameof(bottom));
+            _cylinderHeight = Vector3D.AbsoluteValue(BottomCenter - TopCenter);
         }
 
         public IEnumerator<Vector3D> GetEnumerator()
@@ -94,11 +96,10 @@ namespace Billiard3D.Track
             var baseLine = new Line(TopCenter, BottomCenter);
             var projectedPoint = baseLine.ClosestPoint(point);
 
-            var cylinderHeight = Vector3D.AbsoluteValue(BottomCenter - TopCenter);
             var distanceFromTop = Vector3D.AbsoluteValue(projectedPoint - TopCenter);
             var distanceFromBottom = Vector3D.AbsoluteValue(projectedPoint - BottomCenter);
 
-            return Math.Abs(distanceFromBottom + distanceFromTop - cylinderHeight) < Confidence;
+            return Math.Abs(distanceFromBottom + distanceFromTop - _cylinderHeight) < Confidence;
         }
 
         public override bool Equals(object obj)

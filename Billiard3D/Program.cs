@@ -18,7 +18,10 @@ namespace Billiard3D
         [UsedImplicitly]
         public static void Main(string[] args)
         {
-            ParallelSimulation();
+            //ParallelSimulation();
+            var room = TrackFactory.RoomWithPlaneRoof(6.4);
+            room.Start(Line.FromPointAndDirection((3, 320, 130), (0, 1, 1)));
+            WriteToFile(room, false, "ReSim", "reRe");
         }
 
         private static void ParallelSimulation()
