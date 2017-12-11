@@ -39,7 +39,7 @@ namespace Billiard3D.Track
             {
                 var hitPoints = Objects.Select(x => x.GetIntersectionPoints(currentLine)).Where(x => x.Item1.Any())
                     .ToList();
-                var hittedWall = hitPoints.Where(x => x.Item2 is Wall).OrderBy(x => x.Item1.Min(y => y.Item2)).First();
+                var hittedWall = hitPoints.First(x => x.Item2 is Wall);
 
                 var hitPoint = hittedWall.Item1.First().Item1;
                 var wall = (Wall)hittedWall.Item2;
@@ -50,7 +50,7 @@ namespace Billiard3D.Track
                     if (hittedSphere.Item2 is null)
                     {
                         // no sphere was hit
-                        var hittedCylinder = hitPoints.Where(x => x.Item2 is Cylinder).First(x => x.Item1.Any());
+                        var hittedCylinder = hitPoints.First(x => x.Item2 is Cylinder);
                         var cylinderHitPoint = hittedCylinder.Item1.OrderBy(x => x.Item2).Last();
                         currentLine = hittedCylinder.Item2.LineAfterHit(currentLine, cylinderHitPoint.Item1);
                         previous = hittedCylinder.Item2;
@@ -65,7 +65,7 @@ namespace Billiard3D.Track
                 else
                 {
                     // wall was hit
-                    currentLine = wall?.LineAfterHit(currentLine, hitPoint) ?? throw new InvalidOperationException();
+                    currentLine = wall.LineAfterHit(currentLine, hitPoint);
                     previous = wall;
                 }
                 HitSequence.Add(previous.ObjectName);
