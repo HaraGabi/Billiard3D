@@ -60,7 +60,7 @@ namespace Billiard3D
             };
         }
 
-        public static Room RoomWithTiltedRoof(double radius)
+        public static TiltedRoom RoomWithTiltedRoof(double radius)
         {
             const double distance = 975.0;
             const double width = 640.0;
@@ -77,17 +77,30 @@ namespace Billiard3D
             var secondLeftBottom = (distance, width, 0d);
             var secondLeftTop = (distance, width, height1);
 
-            var frontWall = new Wall(new Vector3D[] {firstRightBottom, firstRightTop, firstLeftTop, firstLeftBottom});
+            var frontWall =
+                new Wall(new Vector3D[] {firstRightBottom, firstRightTop, firstLeftTop, firstLeftBottom})
+                {
+                    NormalVector = (1, 0, 0)
+                };
             var oppositeWall = new Wall(new Vector3D[]
-                {secondRightBottom, secondRightTop, secondLeftTop, secondLeftBottom});
+                {secondRightBottom, secondRightTop, secondLeftTop, secondLeftBottom}) {NormalVector = (-1, 0, 0)};
             var rightWall =
-                new Wall(new Vector3D[] {firstRightBottom, secondRightBottom, secondRightTop, firstRightTop});
-            var leftWall = new Wall(new Vector3D[] {firstLeftBottom, secondLeftBottom, secondLeftTop, firstLeftTop});
+                new Wall(new Vector3D[] {firstRightBottom, secondRightBottom, secondRightTop, firstRightTop})
+                {
+                    NormalVector = (0, 1, 0)
+                };
+            var leftWall =
+                new Wall(new Vector3D[] {firstLeftBottom, secondLeftBottom, secondLeftTop, firstLeftTop})
+                {
+                    NormalVector = (0, -1, 0)
+                };
             var roof = new Wall(new Vector3D[] {firstRightTop, secondRightTop, secondLeftTop, firstLeftTop});
+            roof.NormalVector = (- 1 * roof.NormalVector.X, roof.NormalVector.Y, -1 * roof.NormalVector.Z);
             var floor = new Wall(
-                new Vector3D[] {firstRightBottom, secondRightBottom, secondLeftBottom, firstLeftBottom});
+                    new Vector3D[] {firstRightBottom, secondRightBottom, secondLeftBottom, firstLeftBottom})
+                {NormalVector = (0, 0, 1)};
 
-            return new Room(new[] {frontWall, oppositeWall, rightWall, leftWall, roof, floor}, radius);
+            return new TiltedRoom(new[] {frontWall, oppositeWall, rightWall, leftWall, roof, floor}, radius);
         }
     }
 }

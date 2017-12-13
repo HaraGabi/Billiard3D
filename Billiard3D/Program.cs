@@ -20,8 +20,8 @@ namespace Billiard3D
         public static void Main(string[] args)
         {
             //ParallelSimulation();
-            var room = TrackFactory.CreatePurePlaneRoof();
-            room.Start(Line.FromPointAndDirection(ChosenPoint, (8, 2, 3.7)));
+            var room = TrackFactory.RoomWithTiltedRoof(16.4);
+            room.Start(Line.FromPointAndDirection(ChosenPoint, (8, 2.7, 3.7)));
         }
 
         private static void ParallelSimulation()
@@ -74,7 +74,7 @@ namespace Billiard3D
         {
             var rootDir = isTilted ? "Tilted" : "Common";
             rootDir += $@"\StartPoint {startingPoint} startVelocity {startingVelocity}";
-            var directory = @"D:\szakdoga\adatok" + $@"\{rootDir}\{finished.Radius}\";
+            var directory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + $@"\{rootDir}\{finished.Radius}\";
             Directory.CreateDirectory(directory);
             foreach (var trackObject in finished.Objects)
             {
