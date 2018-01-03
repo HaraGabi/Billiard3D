@@ -9,8 +9,8 @@ namespace Billiard3D.Track
 {
     internal class Cylinder : ITrackObject, IEquatable<Cylinder>, IEnumerable<Vector3D>
     {
-        private double _cylinderHeight;
         private const double Confidence = 0.00005;
+        private readonly double _cylinderHeight;
         private double Radius { get; }
 
         public Vector3D TopCenter { get; }
@@ -47,7 +47,7 @@ namespace Billiard3D.Track
         /// </summary>
         /// <param name="line"></param>
         /// <returns></returns>
-        public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line)
+        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
         {
             if (line == null) throw new ArgumentNullException(nameof(line));
 
@@ -67,14 +67,13 @@ namespace Billiard3D.Track
             var positive = (-b + Math.Sqrt(Math.Pow(b, 2) - 4 * a * c)) / (2 * a);
             var negative = (-b - Math.Sqrt(Math.Pow(b, 2) - 4 * a * c)) / (2 * a);
 
-            var result = new List<(Vector3D, double)>
-                {
-                    (line.PointA + positive * line.Direction, positive),
-                    (line.PointA + negative * line.Direction, negative)
-                }.Where(x => x.Item2 > Confidence).Where(x => InsideTheCylinder(x.Item1))
-                .ToList();
+            var result = new List<Vector3D>
+            {
+                line.PointA + positive * line.Direction,
+                line.PointA + negative * line.Direction
+            }.Where(InsideTheCylinder).ToList();
 
-            return (result, this);
+            return result;
         }
 
         public Line LineAfterHit(Line incoming, Vector3D hitPoint)

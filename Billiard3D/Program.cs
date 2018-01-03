@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Billiard3D.Track;
 using Billiard3D.VectorMath;
@@ -19,37 +21,52 @@ namespace Billiard3D
         [UsedImplicitly]
         public static void Main(string[] args)
         {
-            ParallelSimulation();
+            Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
+            //ParallelSimulation();
+            var start = CreateStartingPoints().First();
+            const int r = 200;
+            var room = TrackFactory.RoomWithPlaneRoof(r);
+            room.NumberOfIterations = 100;
+            room.Start(start);
+
+            var folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\Teszt.txt";
+            var tuples = room.CoordList.Select(x => x.Item1.ToString() + " " + x.Item2);
+            File.WriteAllLines(folderPath, tuples);
+            //var r = new[] { 200, 300};
+            //foreach (var i in r)
+            //{
+            //    var room = TrackFactory.RoomWithPlaneRoof(i);
+            //    room.Start(start);
+            //    WriteToFile(room, false, start.PointA.ToString(), start.Direction.ToString());
+            //}
         }
 
         private static void ParallelSimulation()
         {
             var options = new ParallelOptions {MaxDegreeOfParallelism = 4};
-            Parallel.For(1, 41, options, (index, state) =>
+            var startingPoint = CreateStartingPoints().First();
+            Parallel.For(1, 20, options, (index, state) =>
             {
-                var radius = index * 1.5;
-                foreach (var startingPoint in CreateStartingPoints())
+                var radius = index * 2.5;
+                try
                 {
-                    try
-                    {
-                        var room = TrackFactory.RoomWithPlaneRoof(radius);
-                        room.Start(startingPoint);
-                        WriteToFile(room, false, startingPoint.PointA.ToString(), startingPoint.Direction.ToString());
-                    }
-                    catch (Exception)
-                    {
-                        lock (LockObject)
-                        {
-                            File.AppendAllLines(
-                                Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\Log.txt",
-                                new[] {$"Hiba! {radius} - {startingPoint.PointA} - {startingPoint.Direction}"});
-                            Console.WriteLine($"Error with {radius}");
-                        }
-                    }
+                    var room = TrackFactory.RoomWithPlaneRoof(radius);
+                    room.Start(startingPoint);
+                    WriteToFile(room, false, startingPoint.PointA.ToString(), startingPoint.Direction.ToString());
+                }
+                catch (Exception)
+                {
                     lock (LockObject)
                     {
-                        Console.WriteLine($"Done with {index}");
+                        File.AppendAllLines(
+                            Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\Log.txt",
+                            new[] {$"Hiba! {radius} - {startingPoint.PointA} - {startingPoint.Direction}"});
+                        Console.WriteLine($"Error with {radius}");
                     }
+                }
+                lock (LockObject)
+                {
+                    Console.WriteLine($"Done with {index}");
                 }
             });
         }

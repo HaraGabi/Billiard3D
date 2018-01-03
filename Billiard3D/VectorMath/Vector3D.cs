@@ -89,7 +89,7 @@ namespace Billiard3D.VectorMath
         }
 
 
-        public override string ToString() => $"{{{X}, {Y}, {Z}}}";
+        public override string ToString() => $"{X} {Y} {Z}";
 
         public static Vector3D operator +(Vector3D lValue, Vector3D rValue)
         {

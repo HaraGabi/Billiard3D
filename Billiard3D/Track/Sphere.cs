@@ -27,28 +27,28 @@ namespace Billiard3D.Track
 
         public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10);
 
-        public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line)
+        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
         {
-            var lineDir = line.Direction.Normalize();
+            var lineDir = line.Direction;
             var discriminant = Pow(lineDir * (line.PointA - Center), 2) -
                                Pow(Vector3D.AbsoluteValue(line.PointA - Center), 2) + Pow(Radius, 2);
             if (discriminant < 0)
-                return (Enumerable.Empty<(Vector3D, double)>(), this);
+                return Enumerable.Empty<Vector3D>();
             var plus = -(lineDir * (line.PointA - Center)) + Sqrt(discriminant);
             var minus = -(lineDir * (line.PointA - Center)) - Sqrt(discriminant);
             if (discriminant < Confidence)
             {
                 var result = plus > 0
-                    ? new List<(Vector3D, double)> {(line.PointA + plus * line.Direction, plus)}
-                    : Enumerable.Empty<(Vector3D, double)>();
-                return (result, this);
+                    ? new List<Vector3D> {line.PointA + plus * line.Direction}
+                    : Enumerable.Empty<Vector3D>();
+                return result;
             }
-            var results = new List<(Vector3D, double)>
+            var results = new List<Vector3D>
             {
-                (line.PointA + plus * line.Direction, plus),
-                (line.PointA + minus * line.Direction, minus)
-            }.Where(x => x.Item2 > Confidence);
-            return (results, this);
+                line.PointA + plus * line.Direction,
+                line.PointA + minus * line.Direction
+            };
+            return results;
         }
 
         //
