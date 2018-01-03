@@ -40,9 +40,8 @@ namespace Billiard3D.Track
             CreateSpheres(radius);
         }
 
-        public void Start2([NotNull] Line startLine)
+        public void Start2(Line startLine)
         {
-            if (startLine == null) throw new ArgumentNullException(nameof(startLine));
             var currentLine = startLine;
             for (var i = 0; i < NumberOfIterations; ++i)
             {
@@ -144,8 +143,8 @@ namespace Billiard3D.Track
             var spheres = new List<Sphere>(8);
             foreach (var cylinder in cylinders)
             {
-                var sphereA = new Sphere(cylinder.TopCenter, radius);
-                var sphereB = new Sphere(cylinder.BottomCenter, radius);
+                var sphereA = new Sphere(cylinder.TopCenter, new PointChecker(),  radius);
+                var sphereB = new Sphere(cylinder.BottomCenter, new PointChecker(),  radius);
                 if (!spheres.Exists(x => x.Center == sphereA.Center))
                 {
                     var name = "Sphere" + $" Center {sphereA.Center}";
@@ -165,13 +164,9 @@ namespace Billiard3D.Track
             Objects.AddRange(spheres);
         }
 
-        private Cylinder CalculateCylinder([NotNull] Line first, [NotNull] Line second, [NotNull] Line wallLine,
+        private Cylinder CalculateCylinder(Line first, Line second, Line wallLine,
             double radius)
         {
-            if (first == null) throw new ArgumentNullException(nameof(first));
-            if (second == null) throw new ArgumentNullException(nameof(second));
-            if (wallLine == null) throw new ArgumentNullException(nameof(wallLine));
-
             var angle = Vector3D.Angle(first.Direction, second.Direction);
             var distance = Math.Sin(90.0.ToRadian()) / Math.Sin(angle / 2) * radius;
             MinimumWallDistance = Math.Sqrt(Math.Pow(distance, 2) - Math.Pow(radius, 2));
@@ -197,7 +192,10 @@ namespace Billiard3D.Track
             var correctTop = basLine.GetPointOnLine(radius);
             var correctBottom = reverseBase.GetPointOnLine(radius);
 
-            return new Cylinder(correctTop, correctBottom, radius);
+            var barrier = new Plane(firstPoint, secondPoint, correctBottom);
+            var checker = new PointChecker(barrier, barrier.DeterminePointPosition(referencePoint));
+
+            return new Cylinder(correctTop, correctBottom, checker, radius);
         }
     }
 }

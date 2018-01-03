@@ -8,12 +8,14 @@ namespace Billiard3D.Track
 {
     internal class Sphere : ITrackObject, IEquatable<Sphere>
     {
+        private readonly PointChecker _checker;
         private const double Confidence = 0.00005;
         public Vector3D Center { get; }
         private double Radius { get; }
 
-        public Sphere(Vector3D center, double radius)
+        public Sphere(Vector3D center, PointChecker checker, double radius)
         {
+            _checker = checker;
             Center = center;
             Radius = radius;
         }
@@ -39,7 +41,7 @@ namespace Billiard3D.Track
             if (discriminant < Confidence)
             {
                 var result = plus > 0
-                    ? new List<Vector3D> {line.PointA + plus * line.Direction}
+                    ? (new List<Vector3D> {line.PointA + plus * line.Direction}).Where(_checker.IsPointOnTheCorrectSide)
                     : Enumerable.Empty<Vector3D>();
                 return result;
             }
@@ -48,7 +50,7 @@ namespace Billiard3D.Track
                 line.PointA + plus * line.Direction,
                 line.PointA + minus * line.Direction
             };
-            return results;
+            return results.Where(_checker.IsPointOnTheCorrectSide);
         }
 
         //

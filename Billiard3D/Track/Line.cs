@@ -6,16 +6,16 @@ using JetBrains.Annotations;
 
 namespace Billiard3D.Track
 {
-    internal class Line : IEquatable<Line>, IEnumerable<Vector3D>
+    internal struct Line : IEquatable<Line>, IEnumerable<Vector3D>
     {
         public Vector3D PointB { get; }
         public Vector3D PointA { get; }
         public Vector3D Direction { get; }
 
-        public Line([NotNull] Vector3D pointA, [NotNull] Vector3D pointB)
+        public Line(Vector3D pointA, Vector3D pointB)
         {
-            PointB = pointB ?? throw new ArgumentNullException(nameof(pointB));
-            PointA = pointA ?? throw new ArgumentNullException(nameof(pointA));
+            PointB = pointB;
+            PointA = pointA;
             Direction = (PointB - PointA).Normalize();
         }
 
@@ -29,8 +29,6 @@ namespace Billiard3D.Track
 
         public bool Equals(Line other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
             // todo: this is not true
             return Equals(PointB, other.PointB) && Equals(PointA, other.PointA) && Equals(Direction, other.Direction);
         }
@@ -46,11 +44,8 @@ namespace Billiard3D.Track
         ///     or
         ///     direction
         /// </exception>
-        public static Line FromPointAndDirection([NotNull] Vector3D point, [NotNull] Vector3D direction)
+        public static Line FromPointAndDirection(Vector3D point, Vector3D direction)
         {
-            if (point == null) throw new ArgumentNullException(nameof(point));
-            if (direction == null) throw new ArgumentNullException(nameof(direction));
-
             var pointB = point + 1.26 * direction;
             return new Line(point, pointB);
         }
@@ -61,11 +56,8 @@ namespace Billiard3D.Track
         /// <param name="point">The point.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">point</exception>
-        public double DistanceFrom([NotNull] Vector3D point)
+        public double DistanceFrom(Vector3D point)
         {
-            if (point == null)
-                throw new ArgumentNullException(nameof(point));
-
             var topValue = Math.Pow(Vector3D.AbsoluteValue(Vector3D.CrossProduct(Direction, PointA - point)), 2);
             var bottomValue = Math.Pow(Vector3D.AbsoluteValue(Direction), 2);
             var squareResult = topValue / bottomValue;
@@ -79,12 +71,8 @@ namespace Billiard3D.Track
         /// <param name="toThisReference">To this reference.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">toThisReference</exception>
-        public Vector3D ClosestPoint([NotNull] Vector3D toThisReference)
+        public Vector3D ClosestPoint(Vector3D toThisReference)
         {
-            if (toThisReference == null) throw new ArgumentNullException(nameof(toThisReference));
-
-            //return PointA + (toThisReference - PointA) * Direction / Direction * Direction * Direction;
-
             var v = toThisReference - PointA;
             var t = v * Direction.Normalize();
             return PointA + t * Direction;
@@ -109,7 +97,6 @@ namespace Billiard3D.Track
         public override bool Equals(object obj)
         {
             if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
             return (obj.GetType() == GetType()) && Equals((Line) obj);
         }
 
@@ -117,9 +104,9 @@ namespace Billiard3D.Track
         {
             unchecked
             {
-                var hashCode = PointB != null ? PointB.GetHashCode() : 0;
-                hashCode = (hashCode * 397) ^ (PointA != null ? PointA.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Direction != null ? Direction.GetHashCode() : 0);
+                var hashCode = PointB.GetHashCode();
+                hashCode = (hashCode * 397) ^  PointA.GetHashCode();
+                hashCode = (hashCode * 397) ^  Direction.GetHashCode();
                 return hashCode;
             }
         }

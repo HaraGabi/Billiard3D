@@ -15,6 +15,7 @@ namespace Billiard3D
         private Plane Plane { get; }
         private bool IsPositive { get; }
 
+        [Pure]
         public bool IsPointOnTheCorrectSide([NotNull] Vector3D point)
         {
             if (point == null) throw new ArgumentNullException(nameof(point));
