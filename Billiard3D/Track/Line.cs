@@ -2,11 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using Billiard3D.VectorMath;
-using JetBrains.Annotations;
 
 namespace Billiard3D.Track
 {
-    internal struct Line : IEquatable<Line>, IEnumerable<Vector3D>
+    internal readonly struct Line : IEquatable<Line>, IEnumerable<Vector3D>
     {
         public Vector3D PointB { get; }
         public Vector3D PointA { get; }

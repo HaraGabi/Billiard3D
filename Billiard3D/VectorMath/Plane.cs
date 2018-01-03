@@ -3,7 +3,7 @@ using MathNet.Numerics.LinearAlgebra;
 
 namespace Billiard3D.VectorMath
 {
-    internal struct Plane
+    internal readonly struct Plane
     {
         private Vector3D NormalVector { get; }
         private Vector3D[] BasePoints { get; }

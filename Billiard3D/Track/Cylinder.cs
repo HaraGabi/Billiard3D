@@ -49,7 +49,7 @@ namespace Billiard3D.Track
         /// </summary>
         /// <param name="line"></param>
         /// <returns></returns>
-        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
+        public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
             var baseLine = new Line(TopCenter, BottomCenter);
 
@@ -76,7 +76,7 @@ namespace Billiard3D.Track
             return result;
         }
 
-        public Line LineAfterHit(Line incoming, Vector3D hitPoint)
+        public Line LineAfterHit(in Line incoming, in Vector3D hitPoint)
         {
             HitPoints.Add(hitPoint);
             var baseLine = new Line(TopCenter, BottomCenter);
@@ -90,7 +90,7 @@ namespace Billiard3D.Track
 
         public string ObjectName { get; set; }
 
-        private bool InsideTheCylinder(Vector3D point)
+        private bool InsideTheCylinder(in Vector3D point)
         {
             var baseLine = new Line(TopCenter, BottomCenter);
             var projectedPoint = baseLine.ClosestPoint(point);

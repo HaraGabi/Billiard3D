@@ -8,7 +8,7 @@ using static System.Math;
 namespace Billiard3D.VectorMath
 {
     [DebuggerDisplay("({X}; {Y}; {Z})")]
-    internal struct Vector3D : IEnumerable<double>, IComparable<Vector3D>, IEquatable<Vector3D>
+    internal readonly struct Vector3D : IEnumerable<double>, IComparable<Vector3D>, IEquatable<Vector3D>
     {
         public double X { get; }
         public double Y { get; }

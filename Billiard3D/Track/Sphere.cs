@@ -29,7 +29,7 @@ namespace Billiard3D.Track
 
         public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10);
 
-        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
+        public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
             var lineDir = line.Direction;
             var discriminant = Pow(lineDir * (line.PointA - Center), 2) -
@@ -54,7 +54,7 @@ namespace Billiard3D.Track
         }
 
         //
-        public Line LineAfterHit(Line incoming, Vector3D hitPoint)
+        public Line LineAfterHit(in Line incoming, in Vector3D hitPoint)
         {
             HitPoints.Add(hitPoint);
             var line = new Line(Center, hitPoint);
@@ -78,7 +78,7 @@ namespace Billiard3D.Track
         {
             unchecked
             {
-                return ((Center != null ? Center.GetHashCode() : 0) * 397) ^ Radius.GetHashCode();
+                return ( Center.GetHashCode() * 397) ^ Radius.GetHashCode();
             }
         }
     }
