@@ -15,7 +15,7 @@ namespace Billiard3D
     public class Programs
     {
         private static readonly object LockObject = new object();
-        private static Vector3D ChosenPoint { get; } = (0d, 320d, 130);
+        private static Vector3D ChosenPoint { get; } = (0d, 320d, 328d);
         private static Random Rand { get; } = new Random();
 
         [UsedImplicitly]
@@ -24,7 +24,7 @@ namespace Billiard3D
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
             //ParallelSimulation();
             var start = CreateStartingPoints().First();
-            const int r = 200;
+            const int r = 100;
             var room = TrackFactory.RoomWithPlaneRoof(r);
             room.NumberOfIterations = 100;
             room.Start(start);

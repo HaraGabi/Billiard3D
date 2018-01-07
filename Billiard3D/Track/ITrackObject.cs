@@ -8,8 +8,9 @@ namespace Billiard3D.Track
         string ObjectName { get; }
 
         List<Vector3D> HitPoints { get; }
-        IEnumerable<Vector3D> GetIntersectionPoints(in Line line);
+        IEnumerable<Vector3D> GetIntersectionPoints(Line line);
 
         Line LineAfterHit(in Line incoming, in Vector3D hitPoint);
+        bool IsInCorrectPosition(Line ball);
     }
 }

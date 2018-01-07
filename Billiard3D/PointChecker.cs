@@ -1,5 +1,4 @@
-﻿using System;
-using Billiard3D.VectorMath;
+﻿using Billiard3D.VectorMath;
 using JetBrains.Annotations;
 
 namespace Billiard3D
@@ -16,10 +15,8 @@ namespace Billiard3D
         private bool IsPositive { get; }
 
         [Pure]
-        public bool IsPointOnTheCorrectSide([NotNull] Vector3D point)
+        public bool IsPointOnTheCorrectSide(Vector3D point)
         {
-            if (point == null) throw new ArgumentNullException(nameof(point));
-
             var determinant = Plane.DeterminePointPosition(point);
 
             return ((determinant < 0) && !IsPositive) || ((determinant > 0) && IsPositive);

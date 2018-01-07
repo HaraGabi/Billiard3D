@@ -31,6 +31,13 @@ namespace Billiard3D.VectorMath
             Z = doubles[2];
         }
 
+        public void Deconstruct(out double x, out double y, out double z)
+        {
+            x = X;
+            y = Y;
+            z = Z;
+        }
+
         public int CompareTo(Vector3D other)
         {
             if (AbsoluteValue(other) > AbsoluteValue(this))

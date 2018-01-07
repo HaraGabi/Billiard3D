@@ -49,12 +49,13 @@ namespace Billiard3D.Track
         /// </summary>
         /// <param name="line"></param>
         /// <returns></returns>
-        public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
+        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
         {
             var baseLine = new Line(TopCenter, BottomCenter);
+            var linePoint = line.PointA;
 
-            var v = line.Direction.Normalize();
-            var va = baseLine.Direction.Normalize();
+            var v = line.Direction;
+            var va = baseLine.Direction;
             var deltaP = line.PointA - TopCenter;
 
             var kisA = v - v * va * va;
@@ -67,11 +68,10 @@ namespace Billiard3D.Track
             var positive = (-b + Math.Sqrt(Math.Pow(b, 2) - 4 * a * c)) / (2 * a);
             var negative = (-b - Math.Sqrt(Math.Pow(b, 2) - 4 * a * c)) / (2 * a);
 
-            var result = new List<Vector3D>
-            {
-                line.PointA + positive * line.Direction,
-                line.PointA + negative * line.Direction
-            }.Where(x => InsideTheCylinder(x) && Checker.IsPointOnTheCorrectSide(x)).ToList();
+            var equationResults = new List<double> {positive, negative}.Where(x => x > Confidence);
+
+            var result = equationResults.Select(x => linePoint + x * v)
+                .Where(x => InsideTheCylinder(in x) && Checker.IsPointOnTheCorrectSide(x)).ToList();
 
             return result;
         }
@@ -86,6 +86,11 @@ namespace Billiard3D.Track
             var newDirection = 2 * (-1 * incoming.Direction.Normalize() * normalVector) * normalVector +
                                incoming.Direction.Normalize();
             return Line.FromPointAndDirection(hitPoint, newDirection);
+        }
+
+        public bool IsInCorrectPosition(Line ball)
+        {
+            return Checker.IsPointOnTheCorrectSide(ball.PointA);
         }
 
         public string ObjectName { get; set; }

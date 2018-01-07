@@ -16,7 +16,7 @@ namespace Billiard3D.Track
     {
         private const double Confidence = 0.00005;
 
-        private List<Vector3D> Corners { get; } = new List<Vector3D>(4);
+        public List<Vector3D> Corners { get; } = new List<Vector3D>(4);
         public List<Line> WallLines { get; } = new List<Line>(4);
         public Vector3D NormalVector { get; set; }
 
@@ -36,7 +36,7 @@ namespace Billiard3D.Track
 
         public List<Vector3D> HitPoints { get; } = new List<Vector3D>(100_000);
 
-        public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
+        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
         {
             if (Math.Abs(line.Direction * NormalVector) < Confidence)
             {
@@ -44,6 +44,7 @@ namespace Billiard3D.Track
                 return Enumerable.Empty<Vector3D>();
             }
             var distance = (Corners.First() - line.PointA) * NormalVector / (line.Direction * NormalVector);
+            if (distance < Confidence) return Enumerable.Empty<Vector3D>();
             var hitPoint = new List<Vector3D> {line.PointA + distance * line.Direction};
             hitPoint = hitPoint.Where(OnTheWall).ToList();
 
@@ -56,6 +57,11 @@ namespace Billiard3D.Track
             var newDirection = 2 * (-1 * incoming.Direction * NormalVector) * NormalVector +
                                incoming.Direction;
             return Line.FromPointAndDirection(hitPoint, newDirection);
+        }
+
+        public bool IsInCorrectPosition(Line ball)
+        {
+            return false;
         }
 
         public string ObjectName { get; set; }

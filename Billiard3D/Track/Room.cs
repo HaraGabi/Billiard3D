@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Billiard3D.VectorMath;
 using JetBrains.Annotations;
@@ -9,6 +10,12 @@ namespace Billiard3D.Track
     internal class Room
     {
         private const double Confidence = 0.00005;
+
+        private readonly Dictionary<string, string> _smallObjectNames = new Dictionary<string, string>();
+
+        public readonly List<(Vector3D, string)> CoordList = new List<(Vector3D, string)>();
+
+        private int _counter;
         public double Radius { get; }
 
         public List<ITrackObject> Objects { get; } = new List<ITrackObject>(24);
@@ -17,13 +24,7 @@ namespace Billiard3D.Track
 
         public List<string> HitSequence { get; } = new List<string>(10_000_000);
 
-        public readonly List<(Vector3D, string)> CoordList = new List<(Vector3D, string)>();
-
         private double MinimumWallDistance { get; set; }
-
-        private readonly Dictionary<string, string> _smallObjectNames = new Dictionary<string, string>();
-
-        private int _counter;
 
         public Room([NotNull] IEnumerable<Wall> walls, double radius = 0.003)
         {
@@ -36,60 +37,94 @@ namespace Billiard3D.Track
                 _smallObjectNames.Add(name, (++_counter).ToString());
                 Objects.Add(wall);
             }
+
             CreateCylinders(radius);
             CreateSpheres(radius);
         }
 
-        public void Start2(Line startLine)
+        public void Start(Line startLine)
         {
             var currentLine = startLine;
+            foreach (var item in Objects)
+            {
+                if (item.IsInCorrectPosition(startLine))
+                {
+                    throw new ArgumentException(item.ObjectName);
+                }
+            }
             for (var i = 0; i < NumberOfIterations; ++i)
             {
+                try
+                {
+                    var hitPoints = Objects.Select(x => (x, x.GetIntersectionPoints(currentLine)))
+                        .Where(x => x.Item2.Any()).Select(x => (x.x, x.Item2.Single())).ToList();
+                    var hitted = hitPoints.OrderBy(x => Selector(x.x)).First();
+                    currentLine = hitted.x.LineAfterHit(in currentLine, in hitted.Item2);
+                }
+                catch (InvalidOperationException e)
+                {
+                    Console.WriteLine(e);
+                    var hitPoints = Objects.Select(x => (x, x.GetIntersectionPoints(currentLine)))
+                        .Where(x => x.Item2.Any()).Select(x => (x.x, x.Item2.Single())).ToList();
+                    throw;
+                }
             }
         }
 
-        public void Start(Line startLine)
+        [Pure]
+        private static int Selector(ITrackObject trackObject)
         {
-            //var currentLine = startLine;
-            //for (var i = 0; i < NumberOfIterations; i++)
-            //{
-            //    var hitPoints = Objects.Select(x => x.GetIntersectionPoints(currentLine)).Where(x => x.Item1.Any())
-            //        .ToList();
-            //    var hittedWall = hitPoints.First(x => x.Item2 is Wall);
-
-            //    var hitPoint = hittedWall.Item1.First().Item1;
-            //    var wall = (Wall)hittedWall.Item2;
-            //    ITrackObject previous;
-            //    if (wall.WallLines.Any(x => WasWallHit(x, hitPoint)))
-            //    {
-            //        var hittedSphere = hitPoints.FirstOrDefault(x => x.Item2 is Sphere);
-            //        if (hittedSphere.Item2 is null)
-            //        {
-            //            // no sphere was hit
-            //            var hittedCylinder = hitPoints.First(x => x.Item2 is Cylinder);
-            //            var cylinderHitPoint = hittedCylinder.Item1.OrderBy(x => x.Item2).Last();
-            //            currentLine = hittedCylinder.Item2.LineAfterHit(currentLine, cylinderHitPoint.Item1);
-            //            previous = hittedCylinder.Item2;
-            //            CoordList.Add((currentLine.PointA, _smallObjectNames[hittedCylinder.Item2.ObjectName]));
-            //        }
-            //        else
-            //        {
-            //            var sphereHitPoint = hittedSphere.Item1.OrderBy(x => x.Item2).Last();
-            //            currentLine = hittedSphere.Item2.LineAfterHit(currentLine, sphereHitPoint.Item1);
-            //            previous = hittedSphere.Item2;
-            //            CoordList.Add((currentLine.PointA, _smallObjectNames[hittedSphere.Item2.ObjectName]));
-            //        }
-            //    }
-            //    else
-            //    {
-            //        // wall was hit
-            //        currentLine = wall.LineAfterHit(currentLine, hitPoint);
-            //        previous = wall;
-            //    }
-            //    HitSequence.Add(_smallObjectNames[previous.ObjectName]);
-            //    CoordList.Add((currentLine.PointA, _smallObjectNames[wall.ObjectName]));
-            //}
+            switch (trackObject)
+            {
+                case Sphere s: return 0;
+                case Cylinder c: return 1;
+                case Wall w: return 2;
+                default: throw new NotImplementedException();
+            }
         }
+
+        //public void Start(Line startLine)
+        //{
+        //    //var currentLine = startLine;
+        //    //for (var i = 0; i < NumberOfIterations; i++)
+        //    //{
+        //    //    var hitPoints = Objects.Select(x => x.GetIntersectionPoints(currentLine)).Where(x => x.Item1.Any())
+        //    //        .ToList();
+        //    //    var hittedWall = hitPoints.First(x => x.Item2 is Wall);
+
+        //    //    var hitPoint = hittedWall.Item1.First().Item1;
+        //    //    var wall = (Wall)hittedWall.Item2;
+        //    //    ITrackObject previous;
+        //    //    if (wall.WallLines.Any(x => WasWallHit(x, hitPoint)))
+        //    //    {
+        //    //        var hittedSphere = hitPoints.FirstOrDefault(x => x.Item2 is Sphere);
+        //    //        if (hittedSphere.Item2 is null)
+        //    //        {
+        //    //            // no sphere was hit
+        //    //            var hittedCylinder = hitPoints.First(x => x.Item2 is Cylinder);
+        //    //            var cylinderHitPoint = hittedCylinder.Item1.OrderBy(x => x.Item2).Last();
+        //    //            currentLine = hittedCylinder.Item2.LineAfterHit(currentLine, cylinderHitPoint.Item1);
+        //    //            previous = hittedCylinder.Item2;
+        //    //            CoordList.Add((currentLine.PointA, _smallObjectNames[hittedCylinder.Item2.ObjectName]));
+        //    //        }
+        //    //        else
+        //    //        {
+        //    //            var sphereHitPoint = hittedSphere.Item1.OrderBy(x => x.Item2).Last();
+        //    //            currentLine = hittedSphere.Item2.LineAfterHit(currentLine, sphereHitPoint.Item1);
+        //    //            previous = hittedSphere.Item2;
+        //    //            CoordList.Add((currentLine.PointA, _smallObjectNames[hittedSphere.Item2.ObjectName]));
+        //    //        }
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        // wall was hit
+        //    //        currentLine = wall.LineAfterHit(currentLine, hitPoint);
+        //    //        previous = wall;
+        //    //    }
+        //    //    HitSequence.Add(_smallObjectNames[previous.ObjectName]);
+        //    //    CoordList.Add((currentLine.PointA, _smallObjectNames[wall.ObjectName]));
+        //    //}
+        //}
 
         private bool WasWallHit(Line borderLine, Vector3D hitPoint)
         {
@@ -130,10 +165,11 @@ namespace Billiard3D.Track
                     var name = "Cylinder" + $" Top {cylinder.TopCenter}" + $" Bottom {cylinder.BottomCenter}";
                     cylinder.ObjectName = name;
                     _smallObjectNames.Add(name, (++_counter).ToString());
-                        
+
                     cylinders.Add(cylinder);
                 }
             }
+
             Objects.AddRange(cylinders);
         }
 
@@ -143,8 +179,9 @@ namespace Billiard3D.Track
             var spheres = new List<Sphere>(8);
             foreach (var cylinder in cylinders)
             {
-                var sphereA = new Sphere(cylinder.TopCenter, new PointChecker(),  radius);
-                var sphereB = new Sphere(cylinder.BottomCenter, new PointChecker(),  radius);
+                var sphereA = CreateSphereBarrier(new Sphere(cylinder.TopCenter, radius));
+                var sphereB = CreateSphereBarrier(new Sphere(cylinder.BottomCenter, radius));
+
                 if (!spheres.Exists(x => x.Center == sphereA.Center))
                 {
                     var name = "Sphere" + $" Center {sphereA.Center}";
@@ -161,6 +198,7 @@ namespace Billiard3D.Track
                     spheres.Add(sphereB);
                 }
             }
+
             Objects.AddRange(spheres);
         }
 
@@ -192,10 +230,32 @@ namespace Billiard3D.Track
             var correctTop = basLine.GetPointOnLine(radius);
             var correctBottom = reverseBase.GetPointOnLine(radius);
 
-            var barrier = new Plane(firstPoint, secondPoint, correctBottom);
+            var wallHeight = Vector3D.AbsoluteValue(wallLine.PointB - wallLine.PointA);
+            var sign = otherPoint == wallLine.PointA ? -1 : +1;
+            var bottomPoint = firstPoint + sign * wallHeight * (wallLine.PointB - wallLine.PointA).Normalize();
+
+            var barrier = new Plane(firstPoint, secondPoint, bottomPoint);
             var checker = new PointChecker(barrier, barrier.DeterminePointPosition(referencePoint));
 
             return new Cylinder(correctTop, correctBottom, checker, radius);
+        }
+
+        private Sphere CreateSphereBarrier([NotNull] Sphere sphere)
+        {
+            if (sphere == null) throw new ArgumentNullException(nameof(sphere));
+
+            var walls = Objects.Where(x => x is Wall).Cast<Wall>().GroupBy(x =>
+                    x.Corners.Select(y => Vector3D.AbsoluteValue(y - sphere.Center)).Min())
+                .OrderBy(x => x.Key).SelectMany(x => x).Take(3).ToList();
+            var corner = walls.Select(x => x.Corners).Aggregate((x, y) => x.Intersect(y).ToList()).Single();
+
+            var intersectionPoints = walls.Select(sphere.GetInterSection).ToList();
+            var barrier = new Plane(intersectionPoints[0], intersectionPoints[1], intersectionPoints[2]);
+            var sign = barrier.DeterminePointPosition(corner);
+            var checker = new PointChecker(barrier, sign);
+
+            sphere.Checker = checker;
+            return sphere;
         }
     }
 }
