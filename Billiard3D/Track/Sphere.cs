@@ -47,7 +47,7 @@ namespace Billiard3D.Track
             {
                 (line.PointA + plus * line.Direction, plus),
                 (line.PointA + minus * line.Direction, minus)
-            }.Where(x => x.Item2 > Confidence).ToList();
+            }.Where(x => x.Item2 > Confidence);
             return (results, this);
         }
 
