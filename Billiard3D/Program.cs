@@ -23,7 +23,8 @@ namespace Billiard3D
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
             //ParallelSimulation();
-            var start = CreateStartingPoints().First();
+            var start = Line.FromPointAndDirection((952.0446364170271, 132.49404079443096, 620.74585673165927),
+                (0.082108154884514215, -0.8674675569011453, -0.49067126329694372));
             const int r = 100;
             var room = TrackFactory.RoomWithPlaneRoof(r);
             room.NumberOfIterations = 100;

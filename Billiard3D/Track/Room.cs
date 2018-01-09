@@ -49,7 +49,7 @@ namespace Billiard3D.Track
             {
                 if (item.IsInCorrectPosition(startLine))
                 {
-                    throw new ArgumentException(item.ObjectName);
+                    //throw new ArgumentException(item.ObjectName);
                 }
             }
             for (var i = 0; i < NumberOfIterations; ++i)
