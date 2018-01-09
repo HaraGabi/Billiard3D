@@ -16,7 +16,7 @@ namespace Billiard3D.Track
     {
         private const double Confidence = 0.00005;
 
-        private List<Vector3D> Corners { get; } = new List<Vector3D>(4);
+        public List<Vector3D> Corners { get; } = new List<Vector3D>(4);
         public List<Line> WallLines { get; } = new List<Line>(4);
         public Vector3D NormalVector { get; set; }
 
@@ -36,28 +36,32 @@ namespace Billiard3D.Track
 
         public List<Vector3D> HitPoints { get; } = new List<Vector3D>(100_000);
 
-        public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line)
+        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
         {
             if (Math.Abs(line.Direction * NormalVector) < Confidence)
             {
                 // No Intersection
-                return (Enumerable.Empty<(Vector3D, double)>(), this);
+                return Enumerable.Empty<Vector3D>();
             }
-            // todo: specifics
             var distance = (Corners.First() - line.PointA) * NormalVector / (line.Direction * NormalVector);
-            var hitPoint = new List<(Vector3D, double)> {(line.PointA + distance * line.Direction, distance)};
-            hitPoint = hitPoint.Where(x => x.Item2 > Confidence).Where(x => OnTheWall(x.Item1)).ToList();
+            if (distance < Confidence) return Enumerable.Empty<Vector3D>();
+            var hitPoint = new List<Vector3D> {line.PointA + distance * line.Direction};
+            hitPoint = hitPoint.Where(OnTheWall).ToList();
 
-            return (hitPoint, this);
+            return hitPoint;
         }
 
-        public Line LineAfterHit(Line incoming, Vector3D hitPoint)
+        public Line LineAfterHit(in Line incoming, in Vector3D hitPoint)
         {
             HitPoints.Add(hitPoint);
-            // todo: specifics
-            var newDirection = 2 * (-1 * incoming.Direction.Normalize() * NormalVector) * NormalVector +
-                               incoming.Direction.Normalize();
+            var newDirection = 2 * (-1 * incoming.Direction * NormalVector) * NormalVector +
+                               incoming.Direction;
             return Line.FromPointAndDirection(hitPoint, newDirection);
+        }
+
+        public bool IsInCorrectPosition(Line ball)
+        {
+            return false;
         }
 
         public string ObjectName { get; set; }

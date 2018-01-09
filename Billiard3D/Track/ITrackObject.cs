@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using Billiard3D.VectorMath;
-using JetBrains.Annotations;
 
 namespace Billiard3D.Track
 {
     internal interface ITrackObject
     {
-        string ObjectName { get; set; }
+        string ObjectName { get; }
 
         List<Vector3D> HitPoints { get; }
-        (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints([NotNull] Line line);
+        IEnumerable<Vector3D> GetIntersectionPoints(Line line);
 
-        Line LineAfterHit([NotNull] Line incoming, [NotNull] Vector3D hitPoint);
+        Line LineAfterHit(in Line incoming, in Vector3D hitPoint);
+        bool IsInCorrectPosition(Line ball);
     }
 }

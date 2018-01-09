@@ -3,25 +3,27 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Billiard3D.VectorMath;
-using JetBrains.Annotations;
 
 namespace Billiard3D.Track
 {
     internal class Cylinder : ITrackObject, IEquatable<Cylinder>, IEnumerable<Vector3D>
     {
-        private double _cylinderHeight;
         private const double Confidence = 0.00005;
+        private readonly double _cylinderHeight;
         private double Radius { get; }
 
         public Vector3D TopCenter { get; }
 
         public Vector3D BottomCenter { get; }
 
-        public Cylinder([NotNull] Vector3D top, [NotNull] Vector3D bottom, double radius)
+        private PointChecker Checker { get; }
+
+        public Cylinder(Vector3D top, Vector3D bottom, PointChecker checker, double radius)
         {
+            Checker = checker;
             Radius = radius;
-            TopCenter = top ?? throw new ArgumentNullException(nameof(top));
-            BottomCenter = bottom ?? throw new ArgumentNullException(nameof(bottom));
+            TopCenter = top;
+            BottomCenter = bottom;
             _cylinderHeight = Vector3D.AbsoluteValue(BottomCenter - TopCenter);
         }
 
@@ -47,14 +49,13 @@ namespace Billiard3D.Track
         /// </summary>
         /// <param name="line"></param>
         /// <returns></returns>
-        public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line)
+        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
         {
-            if (line == null) throw new ArgumentNullException(nameof(line));
-
             var baseLine = new Line(TopCenter, BottomCenter);
+            var linePoint = line.PointA;
 
-            var v = line.Direction.Normalize();
-            var va = baseLine.Direction.Normalize();
+            var v = line.Direction;
+            var va = baseLine.Direction;
             var deltaP = line.PointA - TopCenter;
 
             var kisA = v - v * va * va;
@@ -67,17 +68,15 @@ namespace Billiard3D.Track
             var positive = (-b + Math.Sqrt(Math.Pow(b, 2) - 4 * a * c)) / (2 * a);
             var negative = (-b - Math.Sqrt(Math.Pow(b, 2) - 4 * a * c)) / (2 * a);
 
-            var result = new List<(Vector3D, double)>
-                {
-                    (line.PointA + positive * line.Direction, positive),
-                    (line.PointA + negative * line.Direction, negative)
-                }.Where(x => x.Item2 > Confidence).Where(x => InsideTheCylinder(x.Item1))
-                .ToList();
+            var equationResults = new List<double> {positive, negative}.Where(x => x > Confidence);
 
-            return (result, this);
+            var result = equationResults.Select(x => linePoint + x * v)
+                .Where(x => InsideTheCylinder(in x) && Checker.IsPointOnTheCorrectSide(x)).ToList();
+
+            return result;
         }
 
-        public Line LineAfterHit(Line incoming, Vector3D hitPoint)
+        public Line LineAfterHit(in Line incoming, in Vector3D hitPoint)
         {
             HitPoints.Add(hitPoint);
             var baseLine = new Line(TopCenter, BottomCenter);
@@ -89,9 +88,14 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
+        public bool IsInCorrectPosition(Line ball)
+        {
+            return Checker.IsPointOnTheCorrectSide(ball.PointA);
+        }
+
         public string ObjectName { get; set; }
 
-        private bool InsideTheCylinder(Vector3D point)
+        private bool InsideTheCylinder(in Vector3D point)
         {
             var baseLine = new Line(TopCenter, BottomCenter);
             var projectedPoint = baseLine.ClosestPoint(point);
@@ -114,8 +118,8 @@ namespace Billiard3D.Track
             unchecked
             {
                 var hashCode = Radius.GetHashCode();
-                hashCode = (hashCode * 397) ^ (TopCenter != null ? TopCenter.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (BottomCenter != null ? BottomCenter.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ TopCenter.GetHashCode();
+                hashCode = (hashCode * 397) ^ BottomCenter.GetHashCode();
                 return hashCode;
             }
         }

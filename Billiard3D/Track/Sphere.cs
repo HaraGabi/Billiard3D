@@ -27,32 +27,31 @@ namespace Billiard3D.Track
 
         public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10);
 
-        public (IEnumerable<(Vector3D, double)>, ITrackObject) GetIntersectionPoints(Line line)
+        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
         {
-            var lineDir = line.Direction.Normalize();
+            var linePoint = line.PointA;
+            var lineDir = line.Direction;
             var discriminant = Pow(lineDir * (line.PointA - Center), 2) -
                                Pow(Vector3D.AbsoluteValue(line.PointA - Center), 2) + Pow(Radius, 2);
             if (discriminant < 0)
-                return (Enumerable.Empty<(Vector3D, double)>(), this);
+                return Enumerable.Empty<Vector3D>();
             var plus = -(lineDir * (line.PointA - Center)) + Sqrt(discriminant);
             var minus = -(lineDir * (line.PointA - Center)) - Sqrt(discriminant);
             if (discriminant < Confidence)
             {
                 var result = plus > 0
-                    ? new List<(Vector3D, double)> {(line.PointA + plus * line.Direction, plus)}
-                    : Enumerable.Empty<(Vector3D, double)>();
-                return (result, this);
+                    ? new List<Vector3D> {line.PointA + plus * line.Direction}.Where(Checker.IsPointOnTheCorrectSide)
+                    : Enumerable.Empty<Vector3D>();
+                return result;
             }
-            var results = new List<(Vector3D, double)>
-            {
-                (line.PointA + plus * line.Direction, plus),
-                (line.PointA + minus * line.Direction, minus)
-            }.Where(x => x.Item2 > Confidence);
-            return (results, this);
+
+            var equationResults = new List<double> {plus, minus}.Where(x => x > Confidence);
+            var results = equationResults.Select(x => linePoint + x * lineDir);
+            return results.Where(Checker.IsPointOnTheCorrectSide);
         }
 
         //
-        public Line LineAfterHit(Line incoming, Vector3D hitPoint)
+        public Line LineAfterHit(in Line incoming, in Vector3D hitPoint)
         {
             HitPoints.Add(hitPoint);
             var line = new Line(Center, hitPoint);
@@ -63,7 +62,14 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
+        public bool IsInCorrectPosition(Line ball)
+        {
+            return Checker.IsPointOnTheCorrectSide(ball.PointA);
+        }
+
         public string ObjectName { get; set; }
+
+        public PointChecker Checker { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -76,7 +82,7 @@ namespace Billiard3D.Track
         {
             unchecked
             {
-                return ((Center != null ? Center.GetHashCode() : 0) * 397) ^ Radius.GetHashCode();
+                return ( Center.GetHashCode() * 397) ^ Radius.GetHashCode();
             }
         }
     }

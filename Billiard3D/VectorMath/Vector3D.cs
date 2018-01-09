@@ -3,13 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using JetBrains.Annotations;
 using static System.Math;
 
 namespace Billiard3D.VectorMath
 {
     [DebuggerDisplay("({X}; {Y}; {Z})")]
-    internal class Vector3D : IEnumerable<double>, IComparable<Vector3D>, IEquatable<Vector3D>
+    internal readonly struct Vector3D : IEnumerable<double>, IComparable<Vector3D>, IEquatable<Vector3D>
     {
         public double X { get; }
         public double Y { get; }
@@ -32,6 +31,13 @@ namespace Billiard3D.VectorMath
             Z = doubles[2];
         }
 
+        public void Deconstruct(out double x, out double y, out double z)
+        {
+            x = X;
+            y = Y;
+            z = Z;
+        }
+
         public int CompareTo(Vector3D other)
         {
             if (AbsoluteValue(other) > AbsoluteValue(this))
@@ -50,23 +56,12 @@ namespace Billiard3D.VectorMath
 
         public bool Equals(Vector3D other)
         {
-            if (other is null)
-                return false;
             const double confidence = 0.00005;
             var first = Abs(X - other.X) < confidence;
             var second = Abs(Y - other.Y) < confidence;
             var third = Abs(Z - other.Z) < confidence;
             return first && second && third;
         }
-
-        public void Deconstruct(out double x, out double y, out double z)
-        {
-            x = X;
-            y = Y;
-            z = Z;
-        }
-
-        public (Vector3D xDir, Vector3D yDir, Vector3D zDir) GetDirectionVectors() => ((X, 0, 0), (0, Y, 0), (0, 0, Z));
 
         public static double AbsoluteValue(Vector3D vector)
         {
@@ -81,15 +76,7 @@ namespace Billiard3D.VectorMath
             return false;
         }
 
-        public double DistanceFrom([NotNull] Vector3D other)
-        {
-            if (other == null)
-                throw new ArgumentNullException(nameof(other));
-            return AbsoluteValue(this - other);
-        }
-
-
-        public override string ToString() => $"{{{X}, {Y}, {Z}}}";
+        public override string ToString() => $"{X} {Y} {Z}";
 
         public static Vector3D operator +(Vector3D lValue, Vector3D rValue)
         {
@@ -139,19 +126,9 @@ namespace Billiard3D.VectorMath
         public static implicit operator (double x, double y, double z)(Vector3D vector) =>
             (vector.X, vector.Y, vector.Z);
 
-        public static bool operator ==(Vector3D lValue, Vector3D rValue)
-        {
-            if (lValue is null)
-                return false;
-            return lValue.Equals(rValue);
-        }
+        public static bool operator ==(Vector3D lValue, Vector3D rValue) => lValue.Equals(rValue);
 
-        public static bool operator !=(Vector3D lValue, Vector3D rValue)
-        {
-            if (lValue is null)
-                return false;
-            return !lValue.Equals(rValue);
-        }
+        public static bool operator !=(Vector3D lValue, Vector3D rValue) => !lValue.Equals(rValue);
 
         public static double Angle(Vector3D lValue, Vector3D rValue)
         {
