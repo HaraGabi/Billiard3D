@@ -36,7 +36,7 @@ namespace Billiard3D.Track
 
         public List<Vector3D> HitPoints { get; } = new List<Vector3D>(100_000);
 
-        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
+        public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
             if (Math.Abs(line.Direction * NormalVector) < Confidence)
             {

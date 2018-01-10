@@ -49,7 +49,7 @@ namespace Billiard3D.Track
         /// </summary>
         /// <param name="line"></param>
         /// <returns></returns>
-        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
+        public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
             var baseLine = new Line(TopCenter, BottomCenter);
             var linePoint = line.PointA;

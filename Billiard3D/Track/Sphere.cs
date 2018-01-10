@@ -27,7 +27,7 @@ namespace Billiard3D.Track
 
         public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10);
 
-        public IEnumerable<Vector3D> GetIntersectionPoints(Line line)
+        public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
             var linePoint = line.PointA;
             var lineDir = line.Direction;

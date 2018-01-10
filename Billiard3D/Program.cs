@@ -22,24 +22,15 @@ namespace Billiard3D
         public static void Main(string[] args)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
-            //ParallelSimulation();
-            var start = Line.FromPointAndDirection((952.0446364170271, 132.49404079443096, 620.74585673165927),
-                (0.082108154884514215, -0.8674675569011453, -0.49067126329694372));
+            var start = CreateStartingPoints().First();
             const int r = 100;
             var room = TrackFactory.RoomWithPlaneRoof(r);
             room.NumberOfIterations = 100;
             room.Start(start);
 
             var folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\Teszt.txt";
-            var tuples = room.CoordList.Select(x => x.Item1.ToString() + " " + x.Item2);
+            var tuples = room.HitPoints.Select(x => x.ToString());
             File.WriteAllLines(folderPath, tuples);
-            //var r = new[] { 200, 300};
-            //foreach (var i in r)
-            //{
-            //    var room = TrackFactory.RoomWithPlaneRoof(i);
-            //    room.Start(start);
-            //    WriteToFile(room, false, start.PointA.ToString(), start.Direction.ToString());
-            //}
         }
 
         private static void ParallelSimulation()
