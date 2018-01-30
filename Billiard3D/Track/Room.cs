@@ -33,9 +33,9 @@
 
         #region Public Properties
 
-        public List<Vector3D> HitPoints { get; } = new List<Vector3D>();
+        public List<Vector3D> NonWallHitpoints { get; } = new List<Vector3D>();
 
-        public List<string> HitSequence { get; } = new List<string>(10_000_000);
+        public List<string> HitSequence { get; } = new List<string>(1_000_000);
 
         public int NumberOfIterations { private get; set; } = 10_000_000;
 
@@ -68,7 +68,11 @@
                     .Select(x => (x.x, x.Item2.OrderByDescending(v => Vector3D.AbsoluteValue(v - currentLine.PointA)).First())).ToList();
                 var hitted = hitPoints.OrderBy(x => Selector(x.x)).First();
                 HitSequence.Add(hitted.x.ObjectName);
-                HitPoints.Add(hitted.Item2);
+                if (!(hitted.x is Wall))
+                {
+                    NonWallHitpoints.Add(hitted.Item2);
+                }
+
                 currentLine = hitted.x.LineAfterHit(in currentLine, in hitted.Item2);
             }
         }

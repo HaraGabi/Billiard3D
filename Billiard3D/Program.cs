@@ -22,66 +22,79 @@ namespace Billiard3D
         public static void Main(string[] args)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
-            var start = CreateStartingPoints().First();
-            const int r = 100;
-            var room = TrackFactory.RoomWithPlaneRoof(r);
-            room.NumberOfIterations = 100;
-            room.Start(start);
 
-            var folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\Teszt.txt";
-            var tuples = room.HitPoints.Select(x => x.ToString());
-            File.WriteAllLines(folderPath, tuples);
+            //ParallelAutocorrelationSimulation();
+           VariableStartingPoint();
         }
 
-        private static void ParallelSimulation()
+        private static void ParallelAutocorrelationSimulation(double radius = 50)
         {
-            var options = new ParallelOptions {MaxDegreeOfParallelism = 4};
-            var startingPoint = CreateStartingPoints().First();
-            Parallel.For(1, 20, options, (index, state) =>
+            var startingPoints = CreateStartingPoints(400);
+            Parallel.ForEach(startingPoints, startpoint =>
             {
-                var radius = index * 2.5;
-                try
-                {
-                    var room = TrackFactory.RoomWithPlaneRoof(radius);
-                    room.Start(startingPoint);
-                    WriteToFile(room, false, startingPoint.PointA.ToString(), startingPoint.Direction.ToString());
-                }
-                catch (Exception)
-                {
-                    lock (LockObject)
-                    {
-                        File.AppendAllLines(
-                            Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\Log.txt",
-                            new[] {$"Hiba! {radius} - {startingPoint.PointA} - {startingPoint.Direction}"});
-                        Console.WriteLine($"Error with {radius}");
-                    }
-                }
+                var room = TrackFactory.RoomWithPlaneRoof(radius);
+                room.NumberOfIterations = 2_000;
+                room.Start(startpoint);
+                WriteSequence(room, false, startpoint.Direction.ToString());
                 lock (LockObject)
                 {
-                    Console.WriteLine($"Done with {index}");
+                    Console.WriteLine($"Done with {startpoint.Direction}");
                 }
             });
         }
 
-        private static IEnumerable<Line> CreateStartingPoints()
+       private static void VariableStartingPoint()
+       {
+          var startingVelocity = new Vector3D(2, 1, 3);
+          Parallel.For(0, 400, i =>
+          {
+             var startingPoint = ChosenPoint * Rand.NextDouble();
+             var line = Line.FromPointAndDirection(startingPoint, startingVelocity);
+             var room = TrackFactory.RoomWithPlaneRoof(50);
+             room.NumberOfIterations = 200;
+             room.Start(line);
+             WriteToFile(room, false, startingPoint.ToString(), startingVelocity.ToString());
+          });
+       }
+
+
+
+       private static void ParallelSimulation()
+        {
+            var startingPoint = CreateStartingPoints().First();
+            var radiuses = new[] { 10, 50, 100, 300 };
+            Parallel.ForEach(radiuses, (radius, state) =>
+            {
+                var room = TrackFactory.RoomWithPlaneRoof(radius);
+                room.NumberOfIterations = 1_000_000;
+                room.Start(startingPoint);
+                var folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + $@"\TesztNoWalls{radius}.txt";
+                var tuples = room.NonWallHitpoints.Select(x => x.ToString());
+                File.WriteAllLines(folderPath, tuples);
+                WriteToFile(room, false, startingPoint.PointA.ToString(), startingPoint.Direction.ToString());
+                lock (LockObject)
+                {
+                    Console.WriteLine($"Done with {radius}");
+                }
+            });
+        }
+
+        private static IEnumerable<Line> CreateStartingPoints(int howMany = 15)
         {
             var result = new List<Line>();
             var velocities = new List<Vector3D>();
-            velocities.AddRange(Enumerable.Repeat(0,15).Select(x => GetRandomVector()));
+            velocities.AddRange(Enumerable.Repeat(0,howMany).Select(x => GetRandomVector()));
             result.AddRange(velocities.Select(x => Line.FromPointAndDirection(ChosenPoint, x)));
             return result;
         }
 
-        private static Vector3D GetRandomVector()
-        {
-            return (Rand.Next(1, 10), Rand.Next(1, 10), Rand.Next(1, 10));
-        }
+        private static Vector3D GetRandomVector() => (Rand.Next(1, 10), Rand.Next(1, 10), Rand.Next(1, 10));
 
         private static void WriteToFile(Room finished, bool isTilted, string startingPoint, string startingVelocity)
         {
             var rootDir = isTilted ? "Tilted" : "Common";
             rootDir += $@"\StartPoint {startingPoint} startVelocity {startingVelocity}";
-            var directory = @"D:\szakdoga\adatok" + $@"\{rootDir}\{finished.Radius}\";
+            var directory = @"C:\szakdoga\adatokDirection" + $@"\{rootDir}\{finished.Radius}\";
             Directory.CreateDirectory(directory);
             foreach (var trackObject in finished.Objects)
             {
@@ -97,6 +110,20 @@ namespace Billiard3D
             var newStartVelocity = startingVelocity.Trim('{', '}');
             File.WriteAllLines(metaDataName, new[] {newStartFormat, newStartVelocity});
             File.WriteAllLines(sequenceDataName, finished.HitSequence);
+        }
+
+        private static void WriteSequence(Room finished, bool isTilted, string startingVelocity)
+        {
+            var rootDir = isTilted ? "Tilted" : "Common";
+            var directory = @"C:\szakdoga\adatok" + $@"\{rootDir}\{finished.Radius}\";
+            Directory.CreateDirectory(directory);
+
+            var sequenceDataName = directory + $@"\Sequence{startingVelocity}.txt";
+
+            lock (LockObject)
+            {
+                File.WriteAllLines(sequenceDataName, finished.HitSequence);
+            }
         }
     }
 }

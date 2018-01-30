@@ -14,7 +14,7 @@ namespace Billiard3D.VectorMath
         public double Y { get; }
         public double Z { get; }
 
-        private Vector3D(double x, double y, double z)
+        public Vector3D(double x, double y, double z)
         {
             X = x;
             Y = y;
