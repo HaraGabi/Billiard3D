@@ -19,7 +19,7 @@
             var index = 0;
             foreach (var wall in walls)
             {
-                var name = "W" + index;
+                var name = index.ToString();
                 wall.ObjectName = name;
                 Objects.Add(wall);
                 index++;
