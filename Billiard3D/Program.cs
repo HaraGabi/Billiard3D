@@ -39,7 +39,8 @@
       {
          Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
 
-         ParallelAutoCorrelationSimulation();
+         Kausztika(1000);
+         //ParallelAutoCorrelationSimulation();
          //VariableStartingPoint();
          //ParallelSimulation();
          //VeryLong();
@@ -68,7 +69,44 @@
 
       private static void Kausztika(int howMany)
       {
-         
+         var startingPoints = ParallelStartingPoints(howMany);
+         Parallel.ForEach(startingPoints, startLine =>
+         {
+            var room = TrackFactory.RoomWithPlaneRoof(100);
+            room.NumberOfIterations = 2;
+            room.Start(startLine);
+            const string path = @"C:\Workspaces\etc\szakdoga";
+            Directory.CreateDirectory(path);
+            lock (LockObject)
+            {
+               using (var fs = new FileStream(path + $@"\{howMany}.txt", FileMode.Append, FileAccess.Write))
+               {
+                  using (var writer = new StreamWriter(fs))
+                  {
+                     writer.WriteLine(room.EveryHitpoint.Last());
+                  }
+               }
+            }
+         });
+      }
+
+      private static IEnumerable<Line> ParallelStartingPoints(int howMany)
+      {
+         var line1 = new Line((100, 0, 100), (0, 100, 100));
+         var lineForDirection = new Line((25, 0, 100), (0, 25, 100));
+         var length = Vector3D.AbsoluteValue(line1.PointA - line1.PointB);
+         var step = length / howMany;
+         for (var j = 10; j < 100; j++)
+         {
+            for (var i = 10; i <= howMany -10; ++i)
+            {
+               var startPoint = line1.GetPointOnLine(line1.PointA, i * step);
+               var direction = lineForDirection.ClosestPoint(startPoint);
+               var szorozo = 100 / j;
+               startPoint += (0,0,szorozo);
+               yield return Line.FromPointAndDirection(startPoint, direction);
+            }
+         }
       }
 
       private static void ParallelAutoCorrelationSimulation(double radius = 50)
