@@ -97,7 +97,7 @@
       }
 
       [Pure]
-      private static int Selector(ITrackObject trackObject)
+      public static int Selector(ITrackObject trackObject)
       {
          switch (trackObject)
          {

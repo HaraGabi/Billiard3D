@@ -18,6 +18,7 @@ namespace Billiard3D
             return new PureRoom(new[] { frontWall, oppositeWall, rightWall, leftWall, roof, floor });
         }
 
+
         public static void CreateWalls(out Wall frontWall, out Wall oppositeWall, out Wall rightWall, out Wall leftWall, out Wall roof, out Wall floor)
         {
             const double distance = 975.0;

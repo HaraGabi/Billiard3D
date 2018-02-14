@@ -39,7 +39,8 @@
       {
          Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
 
-         Kausztika(1000);
+         //NearAutoCorrelation(50);
+         Kausztika();
          //ParallelAutoCorrelationSimulation();
          //VariableStartingPoint();
          //ParallelSimulation();
@@ -67,44 +68,100 @@
          return (x, y, z);
       }
 
-      private static void Kausztika(int howMany)
+      private static void NearAutoCorrelation(double radius)
       {
-         var startingPoints = ParallelStartingPoints(howMany);
-         Parallel.ForEach(startingPoints, startLine =>
+         var startingPoints = VeryCloseStartingPoints(2000);
+         Parallel.ForEach(startingPoints, (startLine, _, l) =>
          {
-            var room = TrackFactory.RoomWithPlaneRoof(100);
-            room.NumberOfIterations = 2;
+            var room = TrackFactory.RoomWithPlaneRoof(radius);
+            room.NumberOfIterations = 2_000;
             room.Start(startLine);
-            const string path = @"C:\Workspaces\etc\szakdoga";
-            Directory.CreateDirectory(path);
+            WriteSequence(room, false, l.ToString());
             lock (LockObject)
             {
-               using (var fs = new FileStream(path + $@"\{howMany}.txt", FileMode.Append, FileAccess.Write))
-               {
-                  using (var writer = new StreamWriter(fs))
-                  {
-                     writer.WriteLine(room.EveryHitpoint.Last());
-                  }
-               }
+               Console.WriteLine($"Done with {startLine.Direction}");
             }
          });
       }
 
-      private static IEnumerable<Line> ParallelStartingPoints(int howMany)
+      private static IEnumerable<Line> VeryCloseStartingPoints(int howMany)
       {
-         var line1 = new Line((100, 0, 100), (0, 100, 100));
-         var lineForDirection = new Line((25, 0, 100), (0, 25, 100));
-         var length = Vector3D.AbsoluteValue(line1.PointA - line1.PointB);
-         var step = length / howMany;
-         for (var j = 10; j < 100; j++)
+         var startingDirection = (1, 1, 0);
+         for (var i = 0; i < howMany; ++i)
          {
-            for (var i = 10; i <= howMany -10; ++i)
+            yield return Line.FromPointAndDirection(ChosenPoint + i * (Vector3D)(1e-17,1e-17,1e-17), startingDirection);
+         }
+      }
+
+      private static void Kausztika()
+      {
+         var startingPoints = ParallelStartingPoints();
+         Parallel.ForEach(startingPoints, (startLine,_,i) =>
+         {
+            var room = new Caustic();
+            var list = room.Start(startLine);
+            WriteCaustic(list);
+            WriteCaustic(list, i);
+            WriteCausticWithOnlyLast(list);
+         });
+      }
+
+      private static void WriteCaustic(List<Vector3D> list)
+      {
+         const string path = @"C:\Workspaces\etc\szakdoga\proba";
+         Directory.CreateDirectory(path);
+         lock (LockObject)
+         {
+            using (var fs = new FileStream(path + $@"\Caustic.txt", FileMode.Append, FileAccess.Write))
             {
-               var startPoint = line1.GetPointOnLine(line1.PointA, i * step);
-               var direction = lineForDirection.ClosestPoint(startPoint);
-               var szorozo = 100 / j;
-               startPoint += (0,0,szorozo);
-               yield return Line.FromPointAndDirection(startPoint, direction);
+               using (var writer = new StreamWriter(fs))
+               {
+                  list.ForEach(x => writer.WriteLine(x));
+               }
+            }
+         }
+      }
+
+      private static void WriteCaustic(List<Vector3D> list, long l)
+      {
+         const string path = @"C:\Workspaces\etc\szakdoga\numberedSmall";
+         Directory.CreateDirectory(path);
+         lock (LockObject)
+         {
+            using (var fs = new FileStream(path + $@"\Caustic{l}.txt", FileMode.Append, FileAccess.Write))
+            {
+               using (var writer = new StreamWriter(fs))
+               {
+                  list.ForEach(x => writer.WriteLine(x));
+               }
+            }
+         }
+      }
+
+      private static void WriteCausticWithOnlyLast(List<Vector3D> list)
+      {
+         const string path = @"C:\Workspaces\etc\szakdoga";
+         Directory.CreateDirectory(path);
+         lock (LockObject)
+         {
+            using (var fs = new FileStream(path + @"\CausticLast.txt", FileMode.Append, FileAccess.Write))
+            {
+               using (var writer = new StreamWriter(fs))
+               {
+                  if (list.Count > 0)
+                     writer.WriteLine(list.Last());
+               }
+            }
+         }
+      }
+
+      private static IEnumerable<Line> ParallelStartingPoints()
+      {
+         for (var y = 1; y < 100; ++y)
+         {
+            for (var z = 1; z < 100; ++z)
+            {
+               yield return Line.FromPointAndDirection((99, y, z), (-1, 0, 0));
             }
          }
       }
@@ -112,12 +169,12 @@
       private static void ParallelAutoCorrelationSimulation(double radius = 50)
       {
          var startingPoints = CreateStartingPoints(400);
-         Parallel.ForEach(startingPoints, startLine =>
+         Parallel.ForEach(startingPoints, (startLine,_,l) =>
          {
             var room = TrackFactory.RoomWithPlaneRoof(radius);
             room.NumberOfIterations = 2_000;
             room.Start(startLine);
-            WriteSequence(room, false, startLine.Direction.ToString());
+            WriteSequence(room, false, l.ToString());
             lock (LockObject)
             {
                Console.WriteLine($"Done with {startLine.Direction}");
@@ -195,8 +252,7 @@
 
       private static void WriteSequence(Room finished, bool isTilted, string startingVelocity)
       {
-         var rootDir = isTilted ? "Tilted" : "Common";
-         var directory = @"C:\szakdoga\adatok" + $@"\{rootDir}\{finished.Radius}\";
+         var directory = @"C:\Workspaces\etc\szakdoga\autoCorr3" + $@"\{finished.Radius}\";
          Directory.CreateDirectory(directory);
 
          var sequenceDataName = directory + $@"\Sequence{startingVelocity}.txt";
