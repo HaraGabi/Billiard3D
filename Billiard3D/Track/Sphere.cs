@@ -8,9 +8,15 @@ namespace Billiard3D.Track
 {
     internal class Sphere : ITrackObject, IEquatable<Sphere>
     {
-        private const double Confidence = 0.00005;
         public Vector3D Center { get; }
         private double Radius { get; }
+
+        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10);
+
+        public string ObjectName { get; set; }
+
+        public PointChecker Checker { get; set; }
+        private const double Confidence = 0.00005;
 
         public Sphere(Vector3D center, double radius)
         {
@@ -24,8 +30,6 @@ namespace Billiard3D.Track
             if (ReferenceEquals(this, other)) return true;
             return Equals(Center, other.Center) && Radius.Equals(other.Radius);
         }
-
-        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10);
 
         public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
@@ -62,27 +66,20 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
-        public bool IsInCorrectPosition(Line ball)
-        {
-            return Checker.IsPointOnTheCorrectSide(ball.PointA);
-        }
-
-        public string ObjectName { get; set; }
-
-        public PointChecker Checker { get; set; }
+        public bool IsInCorrectPosition(Line ball) => Checker.IsPointOnTheCorrectSide(ball.PointA);
 
         public override bool Equals(object obj)
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return (obj.GetType() == GetType()) && Equals((Sphere) obj);
+            return obj.GetType() == GetType() && Equals((Sphere) obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return ( Center.GetHashCode() * 397) ^ Radius.GetHashCode();
+                return Center.GetHashCode() * 397 ^ Radius.GetHashCode();
             }
         }
     }

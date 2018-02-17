@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Billiard3D.Track;
 using JetBrains.Annotations;
 
@@ -20,9 +18,9 @@ namespace Billiard3D.VectorMath
 
             var d = -(a * x0 + b * y0 + c * z0);
 
-            var squreResult = a * a + b * b + c * c;
+            var squareResult = a * a + b * b + c * c;
             var equation = a * xs + b * ys + c * zs + d;
-            var sameInEvery = equation / squreResult;
+            var sameInEvery = equation / squareResult;
 
             var xc = xs - a * sameInEvery;
             var yc = ys - b * sameInEvery;

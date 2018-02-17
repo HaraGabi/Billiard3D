@@ -8,7 +8,6 @@ namespace Billiard3D.Track
 {
     internal class Cylinder : ITrackObject, IEquatable<Cylinder>, IEnumerable<Vector3D>
     {
-        private const double Confidence = 0.00005;
         private readonly double _cylinderHeight;
         private double Radius { get; }
 
@@ -17,6 +16,11 @@ namespace Billiard3D.Track
         public Vector3D BottomCenter { get; }
 
         private PointChecker Checker { get; }
+
+        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(1000);
+
+        public string ObjectName { get; set; }
+        private const double Confidence = 0.00005;
 
         public Cylinder(Vector3D top, Vector3D bottom, PointChecker checker, double radius)
         {
@@ -41,8 +45,6 @@ namespace Billiard3D.Track
             if (ReferenceEquals(this, other)) return true;
             return Radius.Equals(other.Radius) && this.Contains(other.TopCenter) && this.Contains(other.BottomCenter);
         }
-
-        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(1000);
 
         /// <summary>
         ///     Gets the necessary coefficient for the line to reach cylinder
@@ -88,12 +90,7 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
-        public bool IsInCorrectPosition(Line ball)
-        {
-            return Checker.IsPointOnTheCorrectSide(ball.PointA);
-        }
-
-        public string ObjectName { get; set; }
+        public bool IsInCorrectPosition(Line ball) => Checker.IsPointOnTheCorrectSide(ball.PointA);
 
         private bool InsideTheCylinder(in Vector3D point)
         {
@@ -110,7 +107,7 @@ namespace Billiard3D.Track
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return (obj.GetType() == GetType()) && Equals((Cylinder) obj);
+            return obj.GetType() == GetType() && Equals((Cylinder) obj);
         }
 
         public override int GetHashCode()
@@ -118,8 +115,8 @@ namespace Billiard3D.Track
             unchecked
             {
                 var hashCode = Radius.GetHashCode();
-                hashCode = (hashCode * 397) ^ TopCenter.GetHashCode();
-                hashCode = (hashCode * 397) ^ BottomCenter.GetHashCode();
+                hashCode = hashCode * 397 ^ TopCenter.GetHashCode();
+                hashCode = hashCode * 397 ^ BottomCenter.GetHashCode();
                 return hashCode;
             }
         }

@@ -14,11 +14,14 @@ namespace Billiard3D.Track
     [DebuggerDisplay("({NormalVector.X}, {NormalVector.Y}, {NormalVector.Z})")]
     internal class Wall : ITrackObject
     {
-        private const double Confidence = 0.00005;
-
         public List<Vector3D> Corners { get; } = new List<Vector3D>(4);
         public List<Line> WallLines { get; } = new List<Line>(4);
         public Vector3D NormalVector { get; set; }
+
+        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(100_000);
+
+        public string ObjectName { get; set; }
+        private const double Confidence = 0.00005;
 
         public Wall(IEnumerable<Vector3D> corners)
         {
@@ -34,15 +37,9 @@ namespace Billiard3D.Track
             }
         }
 
-        public List<Vector3D> HitPoints { get; } = new List<Vector3D>(100_000);
-
         public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
-            if (Math.Abs(line.Direction * NormalVector) < Confidence)
-            {
-                // No Intersection
-                return Enumerable.Empty<Vector3D>();
-            }
+            if (Math.Abs(line.Direction * NormalVector) < Confidence) return Enumerable.Empty<Vector3D>();
             var distance = (Corners.First() - line.PointA) * NormalVector / (line.Direction * NormalVector);
             if (distance < Confidence) return Enumerable.Empty<Vector3D>();
             var hitPoint = new List<Vector3D> {line.PointA + distance * line.Direction};
@@ -59,12 +56,7 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
-        public bool IsInCorrectPosition(Line ball)
-        {
-            return false;
-        }
-
-        public string ObjectName { get; set; }
+        public bool IsInCorrectPosition(Line ball) => false;
 
         private bool OnTheWall(Vector3D hitPoint)
         {
@@ -76,13 +68,13 @@ namespace Billiard3D.Track
             var minY = Corners.Min(x => x.Y);
             var minZ = Corners.Min(x => x.Z);
 
-            var smallerThanMaxX = (hitPoint.X < maxX) || (Math.Abs(hitPoint.X - maxX) < Confidence);
-            var smallerThanMaxY = (hitPoint.Y < maxY) || (Math.Abs(hitPoint.Y - maxY) < Confidence);
-            var smallerThanMaxZ = (hitPoint.Z < maxZ) || (Math.Abs(hitPoint.Z - maxZ) < Confidence);
+            var smallerThanMaxX = hitPoint.X < maxX || Math.Abs(hitPoint.X - maxX) < Confidence;
+            var smallerThanMaxY = hitPoint.Y < maxY || Math.Abs(hitPoint.Y - maxY) < Confidence;
+            var smallerThanMaxZ = hitPoint.Z < maxZ || Math.Abs(hitPoint.Z - maxZ) < Confidence;
 
-            var biggerThanMinX = (hitPoint.X > minX) || (Math.Abs(hitPoint.X - minX) < Confidence);
-            var biggerThanMinY = (hitPoint.Y > minY) || (Math.Abs(hitPoint.Y - minY) < Confidence);
-            var biggerThanMinZ = (hitPoint.Z > minZ) || (Math.Abs(hitPoint.Z - minZ) < Confidence);
+            var biggerThanMinX = hitPoint.X > minX || Math.Abs(hitPoint.X - minX) < Confidence;
+            var biggerThanMinY = hitPoint.Y > minY || Math.Abs(hitPoint.Y - minY) < Confidence;
+            var biggerThanMinZ = hitPoint.Z > minZ || Math.Abs(hitPoint.Z - minZ) < Confidence;
 
             var forX = smallerThanMaxX && biggerThanMinX;
             var forY = smallerThanMaxY && biggerThanMinY;

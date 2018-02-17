@@ -5,57 +5,54 @@ namespace Billiard3D
 {
     internal static class TrackFactory
     {
+        private const double Distance = 975.0;
+        private const double Width = 640.0;
+        private const double HeightHigher = 657.0;
+        private const double HeightLower = 215.0;
+
         public static Room RoomWithPlaneRoof(double radius)
         {
-            CreateWalls(out var frontWall, out var oppositeWall, out var rightWall, out var leftWall, out var roof, out var floor);
+            CreateWalls(out var frontWall, out var oppositeWall, out var rightWall, out var leftWall, out var roof,
+                out var floor);
 
-            return new Room(new[] { frontWall, oppositeWall, rightWall, leftWall, roof, floor }, radius);
-        }
-
-        public static PureRoom CreatePurePlaneRoof()
-        {
-            CreateWalls(out var frontWall, out var oppositeWall, out var rightWall, out var leftWall, out var roof, out var floor);
-            return new PureRoom(new[] { frontWall, oppositeWall, rightWall, leftWall, roof, floor });
+            return new Room(new[] {frontWall, oppositeWall, rightWall, leftWall, roof, floor}, radius);
         }
 
 
-        public static void CreateWalls(out Wall frontWall, out Wall oppositeWall, out Wall rightWall, out Wall leftWall, out Wall roof, out Wall floor)
+        public static void CreateWalls(out Wall frontWall, out Wall oppositeWall, out Wall rightWall, out Wall leftWall,
+            out Wall roof, out Wall floor)
         {
-            const double distance = 975.0;
-            const double width = 640.0;
-            const double height = 657.0;
-
             var firstRightBottom = (0D, 0d, 0d);
-            var firstRightTop = (0D, 0d, height);
-            var firstLeftBottom = (0D, width, 0d);
-            var firstLeftTop = (0d, width, height);
+            var firstRightTop = (0D, 0d, HeightHigher);
+            var firstLeftBottom = (0D, Width, 0d);
+            var firstLeftTop = (0d, Width, HeightHigher);
 
-            var secondRightBottom = (distance, 0d, 0d);
-            var secondRightTop = (distance, 0d, height);
-            var secondLeftBottom = (distance, width, 0d);
-            var secondLeftTop = (distance, width, height);
+            var secondRightBottom = (Distance, 0d, 0d);
+            var secondRightTop = (Distance, 0d, HeightHigher);
+            var secondLeftBottom = (Distance, Width, 0d);
+            var secondLeftTop = (Distance, Width, HeightHigher);
 
-            frontWall = new Wall(new Vector3D[] { firstRightBottom, firstRightTop, firstLeftTop, firstLeftBottom })
+            frontWall = new Wall(new Vector3D[] {firstRightBottom, firstRightTop, firstLeftTop, firstLeftBottom})
             {
                 NormalVector = (1, 0, 0)
             };
-            oppositeWall = new Wall(new Vector3D[] { secondRightBottom, secondRightTop, secondLeftTop, secondLeftBottom })
+            oppositeWall = new Wall(new Vector3D[] {secondRightBottom, secondRightTop, secondLeftTop, secondLeftBottom})
             {
                 NormalVector = (-1, 0, 0)
             };
-            rightWall = new Wall(new Vector3D[] { firstRightBottom, secondRightBottom, secondRightTop, firstRightTop })
+            rightWall = new Wall(new Vector3D[] {firstRightBottom, secondRightBottom, secondRightTop, firstRightTop})
             {
                 NormalVector = (0, 1, 0)
             };
-            leftWall = new Wall(new Vector3D[] { firstLeftBottom, secondLeftBottom, secondLeftTop, firstLeftTop })
+            leftWall = new Wall(new Vector3D[] {firstLeftBottom, secondLeftBottom, secondLeftTop, firstLeftTop})
             {
                 NormalVector = (0, -1, 0)
             };
-            roof = new Wall(new Vector3D[] { firstRightTop, secondRightTop, secondLeftTop, firstLeftTop })
+            roof = new Wall(new Vector3D[] {firstRightTop, secondRightTop, secondLeftTop, firstLeftTop})
             {
                 NormalVector = (0, 0, -1)
             };
-            floor = new Wall(new Vector3D[] { firstRightBottom, secondRightBottom, secondLeftBottom, firstLeftBottom })
+            floor = new Wall(new Vector3D[] {firstRightBottom, secondRightBottom, secondLeftBottom, firstLeftBottom})
             {
                 NormalVector = (0, 0, 1)
             };
@@ -63,20 +60,15 @@ namespace Billiard3D
 
         public static Room RoomWithTiltedRoof(double radius)
         {
-            const double distance = 975.0;
-            const double width = 640.0;
-            const double height1 = 657.0;
-            const double height2 = 215.0;
-
             var firstRightBottom = (0D, 0d, 0d);
-            var firstRightTop = (0D, 0d, height2);
-            var firstLeftBottom = (0D, width, 0d);
-            var firstLeftTop = (0d, width, height2);
+            var firstRightTop = (0D, 0d, HeightLower);
+            var firstLeftBottom = (0D, Width, 0d);
+            var firstLeftTop = (0d, Width, HeightLower);
 
-            var secondRightBottom = (distance, 0d, 0d);
-            var secondRightTop = (distance, 0d, height1);
-            var secondLeftBottom = (distance, width, 0d);
-            var secondLeftTop = (distance, width, height1);
+            var secondRightBottom = (Distance, 0d, 0d);
+            var secondRightTop = (Distance, 0d, HeightHigher);
+            var secondLeftBottom = (Distance, Width, 0d);
+            var secondLeftTop = (Distance, Width, HeightHigher);
 
             var frontWall = new Wall(new Vector3D[] {firstRightBottom, firstRightTop, firstLeftTop, firstLeftBottom});
             var oppositeWall = new Wall(new Vector3D[]

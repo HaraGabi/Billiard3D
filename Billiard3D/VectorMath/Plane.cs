@@ -5,6 +5,7 @@ namespace Billiard3D.VectorMath
 {
     internal readonly struct Plane
     {
+        // ReSharper disable once UnusedAutoPropertyAccessor.Local
         private Vector3D NormalVector { get; }
         private Vector3D[] BasePoints { get; }
 

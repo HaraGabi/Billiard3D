@@ -26,11 +26,8 @@ namespace Billiard3D.Track
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public bool Equals(Line other)
-        {
-            // todo: this is not true
-            return Equals(PointB, other.PointB) && Equals(PointA, other.PointA) && Equals(Direction, other.Direction);
-        }
+        public bool Equals(Line other) => Equals(PointB, other.PointB) && Equals(PointA, other.PointA) &&
+                                          Equals(Direction, other.Direction);
 
         /// <summary>
         ///     Creates a <see cref="Line" /> using one point and a direction vector
@@ -96,7 +93,7 @@ namespace Billiard3D.Track
         public override bool Equals(object obj)
         {
             if (obj is null) return false;
-            return (obj.GetType() == GetType()) && Equals((Line) obj);
+            return obj.GetType() == GetType() && Equals((Line) obj);
         }
 
         public override int GetHashCode()
@@ -104,8 +101,8 @@ namespace Billiard3D.Track
             unchecked
             {
                 var hashCode = PointB.GetHashCode();
-                hashCode = (hashCode * 397) ^  PointA.GetHashCode();
-                hashCode = (hashCode * 397) ^  Direction.GetHashCode();
+                hashCode = hashCode * 397 ^ PointA.GetHashCode();
+                hashCode = hashCode * 397 ^ Direction.GetHashCode();
                 return hashCode;
             }
         }
