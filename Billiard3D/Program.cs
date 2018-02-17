@@ -182,11 +182,7 @@ namespace Billiard3D
                 var room = TrackFactory.RoomWithPlaneRoof(radius);
                 room.NumberOfIterations = 100_000_000;
                 room.Start(startingPoint);
-                var folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) +
-                                 $@"\TesztNoWalls2{radius}.txt";
-                var tuples = room.NonWallHitpoints.Select(x => x.ToString());
-                File.WriteAllLines(folderPath, tuples);
-                WriteToFile(room, false, startingPoint.PointA.ToString(), startingPoint.Direction.ToString());
+                WriteToFile(room, false, startingPoint.BasePoint.ToString(), startingPoint.Direction.ToString());
                 lock (LockObject)
                 {
                     Console.WriteLine($"Done with {radius}");
@@ -224,9 +220,9 @@ namespace Billiard3D
                     lock (LockObject)
                     {
                         Directory.CreateDirectory(folderPath);
-                        foreach (var obj in room.Objects)
+                        foreach (var obj in room.Boundaries)
                         {
-                            var filePath = folderPath + $@"\{obj.ObjectName}.txt";
+                            var filePath = folderPath + $@"\{obj.BoundaryName}.txt";
                             using (var file = new FileStream(filePath, FileMode.Append, FileAccess.Write))
                             {
                                 using (var writer = new StreamWriter(file))
@@ -262,9 +258,9 @@ namespace Billiard3D
             rootDir += $@"\StartPoint {startingPoint} startVelocity {startingVelocity}";
             var directory = @"C:\szakdoga\adatokDirection" + $@"\{rootDir}\{finished.Radius}\";
             Directory.CreateDirectory(directory);
-            foreach (var trackObject in finished.Objects)
+            foreach (var trackObject in finished.Boundaries)
             {
-                var name = trackObject.ObjectName + ".txt";
+                var name = trackObject.BoundaryName + ".txt";
                 var fullPath = directory + name;
                 File.WriteAllLines(fullPath, trackObject.HitPoints.Select(x => x.ToString()));
             }

@@ -3,9 +3,9 @@ using Billiard3D.VectorMath;
 
 namespace Billiard3D.Track
 {
-    internal interface ITrackObject
+    internal interface ITrackBoundary
     {
-        string ObjectName { get; }
+        string BoundaryName { get; }
 
         List<Vector3D> HitPoints { get; }
         IEnumerable<Vector3D> GetIntersectionPoints(in Line line);

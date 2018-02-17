@@ -6,14 +6,14 @@ using static System.Math;
 
 namespace Billiard3D.Track
 {
-    internal class Sphere : ITrackObject, IEquatable<Sphere>
+    internal class Sphere : ITrackBoundary, IEquatable<Sphere>
     {
         public Vector3D Center { get; }
         private double Radius { get; }
 
         public List<Vector3D> HitPoints { get; } = new List<Vector3D>(10);
 
-        public string ObjectName { get; set; }
+        public string BoundaryName { get; set; }
 
         public PointChecker Checker { get; set; }
         private const double Confidence = 0.00005;
@@ -33,18 +33,18 @@ namespace Billiard3D.Track
 
         public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
-            var linePoint = line.PointA;
+            var linePoint = line.BasePoint;
             var lineDir = line.Direction;
-            var discriminant = Pow(lineDir * (line.PointA - Center), 2) -
-                               Pow(Vector3D.AbsoluteValue(line.PointA - Center), 2) + Pow(Radius, 2);
+            var discriminant = Pow(lineDir * (line.BasePoint - Center), 2) -
+                               Pow(Vector3D.AbsoluteValue(line.BasePoint - Center), 2) + Pow(Radius, 2);
             if (discriminant < 0)
                 return Enumerable.Empty<Vector3D>();
-            var plus = -(lineDir * (line.PointA - Center)) + Sqrt(discriminant);
-            var minus = -(lineDir * (line.PointA - Center)) - Sqrt(discriminant);
+            var plus = -(lineDir * (line.BasePoint - Center)) + Sqrt(discriminant);
+            var minus = -(lineDir * (line.BasePoint - Center)) - Sqrt(discriminant);
             if (discriminant < Confidence)
             {
                 var result = plus > 0
-                    ? new List<Vector3D> {line.PointA + plus * line.Direction}.Where(Checker.IsPointOnTheCorrectSide)
+                    ? new List<Vector3D> {line.BasePoint + plus * line.Direction}.Where(Checker.IsPointOnTheCorrectSide)
                     : Enumerable.Empty<Vector3D>();
                 return result;
             }
@@ -66,7 +66,7 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
-        public bool IsInCorrectPosition(Line ball) => Checker.IsPointOnTheCorrectSide(ball.PointA);
+        public bool IsInCorrectPosition(Line ball) => Checker.IsPointOnTheCorrectSide(ball.BasePoint);
 
         public override bool Equals(object obj)
         {

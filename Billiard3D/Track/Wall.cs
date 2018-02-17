@@ -12,7 +12,7 @@ namespace Billiard3D.Track
     ///     of each other
     /// </summary>
     [DebuggerDisplay("({NormalVector.X}, {NormalVector.Y}, {NormalVector.Z})")]
-    internal class Wall : ITrackObject
+    internal class Wall : ITrackBoundary
     {
         public List<Vector3D> Corners { get; } = new List<Vector3D>(4);
         public List<Line> WallLines { get; } = new List<Line>(4);
@@ -20,7 +20,7 @@ namespace Billiard3D.Track
 
         public List<Vector3D> HitPoints { get; } = new List<Vector3D>(100_000);
 
-        public string ObjectName { get; set; }
+        public string BoundaryName { get; set; }
         private const double Confidence = 0.00005;
 
         public Wall(IEnumerable<Vector3D> corners)
@@ -40,9 +40,9 @@ namespace Billiard3D.Track
         public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
             if (Math.Abs(line.Direction * NormalVector) < Confidence) return Enumerable.Empty<Vector3D>();
-            var distance = (Corners.First() - line.PointA) * NormalVector / (line.Direction * NormalVector);
+            var distance = (Corners.First() - line.BasePoint) * NormalVector / (line.Direction * NormalVector);
             if (distance < Confidence) return Enumerable.Empty<Vector3D>();
-            var hitPoint = new List<Vector3D> {line.PointA + distance * line.Direction};
+            var hitPoint = new List<Vector3D> {line.BasePoint + distance * line.Direction};
             hitPoint = hitPoint.Where(OnTheWall).ToList();
 
             return hitPoint;

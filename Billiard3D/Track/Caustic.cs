@@ -6,7 +6,7 @@ namespace Billiard3D.Track
 {
     internal class Caustic
     {
-        private List<ITrackObject> TrackObjects { get; } = new List<ITrackObject>();
+        private List<ITrackBoundary> TrackObjects { get; } = new List<ITrackBoundary>();
 
         public Caustic()
         {
@@ -38,7 +38,7 @@ namespace Billiard3D.Track
             var plane = new Plane((half, dimension, half), (half, half, 0), (half, 0, half));
             var sign = plane.DeterminePointPosition((0, half, half));
             sphere.Checker = new PointChecker(plane, sign);
-            TrackObjects.AddRange(new ITrackObject[]
+            TrackObjects.AddRange(new ITrackBoundary[]
                 {frontWall, backWall, rightWall, leftWall, floor, ceiling, sphere});
         }
 
@@ -51,7 +51,7 @@ namespace Billiard3D.Track
                 var hitPoints = TrackObjects.Select(x => (x, x.GetIntersectionPoints(in currentLine)))
                     .Where(x => x.Item2.Any())
                     .Select(x =>
-                        (x.x, x.Item2.OrderByDescending(v => Vector3D.AbsoluteValue(v - currentLine.PointA)).First()))
+                        (x.x, x.Item2.OrderByDescending(v => Vector3D.AbsoluteValue(v - currentLine.BasePoint)).First()))
                     .ToList();
                 var hitted = hitPoints.OrderBy(x => Room.Selector(x.x)).First();
 

@@ -6,7 +6,7 @@ using Billiard3D.VectorMath;
 
 namespace Billiard3D.Track
 {
-    internal class Cylinder : ITrackObject, IEquatable<Cylinder>, IEnumerable<Vector3D>
+    internal class Cylinder : ITrackBoundary, IEquatable<Cylinder>, IEnumerable<Vector3D>
     {
         private readonly double _cylinderHeight;
         private double Radius { get; }
@@ -19,7 +19,7 @@ namespace Billiard3D.Track
 
         public List<Vector3D> HitPoints { get; } = new List<Vector3D>(1000);
 
-        public string ObjectName { get; set; }
+        public string BoundaryName { get; set; }
         private const double Confidence = 0.00005;
 
         public Cylinder(Vector3D top, Vector3D bottom, PointChecker checker, double radius)
@@ -54,11 +54,11 @@ namespace Billiard3D.Track
         public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
             var baseLine = new Line(TopCenter, BottomCenter);
-            var linePoint = line.PointA;
+            var linePoint = line.BasePoint;
 
             var v = line.Direction;
             var va = baseLine.Direction;
-            var deltaP = line.PointA - TopCenter;
+            var deltaP = line.BasePoint - TopCenter;
 
             var kisA = v - v * va * va;
             var kisC = deltaP - deltaP * va * va;
@@ -90,7 +90,7 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
-        public bool IsInCorrectPosition(Line ball) => Checker.IsPointOnTheCorrectSide(ball.PointA);
+        public bool IsInCorrectPosition(Line ball) => Checker.IsPointOnTheCorrectSide(ball.BasePoint);
 
         private bool InsideTheCylinder(in Vector3D point)
         {

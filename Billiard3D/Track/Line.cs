@@ -7,26 +7,26 @@ namespace Billiard3D.Track
 {
     internal readonly struct Line : IEquatable<Line>, IEnumerable<Vector3D>
     {
-        public Vector3D PointB { get; }
-        public Vector3D PointA { get; }
+        public Vector3D SecondPoint { get; }
+        public Vector3D BasePoint { get; }
         public Vector3D Direction { get; }
 
-        public Line(Vector3D pointA, Vector3D pointB)
+        public Line(Vector3D basePoint, Vector3D secondPoint)
         {
-            PointB = pointB;
-            PointA = pointA;
-            Direction = (PointB - PointA).Normalize();
+            SecondPoint = secondPoint;
+            BasePoint = basePoint;
+            Direction = (SecondPoint - BasePoint).Normalize();
         }
 
         public IEnumerator<Vector3D> GetEnumerator()
         {
-            yield return PointA;
-            yield return PointB;
+            yield return BasePoint;
+            yield return SecondPoint;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public bool Equals(Line other) => Equals(PointB, other.PointB) && Equals(PointA, other.PointA) &&
+        public bool Equals(Line other) => Equals(SecondPoint, other.SecondPoint) && Equals(BasePoint, other.BasePoint) &&
                                           Equals(Direction, other.Direction);
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Billiard3D.Track
         /// <exception cref="ArgumentNullException">point</exception>
         public double DistanceFrom(Vector3D point)
         {
-            var topValue = Math.Pow(Vector3D.AbsoluteValue(Vector3D.CrossProduct(Direction, PointA - point)), 2);
+            var topValue = Math.Pow(Vector3D.AbsoluteValue(Vector3D.CrossProduct(Direction, BasePoint - point)), 2);
             var bottomValue = Math.Pow(Vector3D.AbsoluteValue(Direction), 2);
             var squareResult = topValue / bottomValue;
             var result = Math.Sqrt(squareResult);
@@ -69,9 +69,9 @@ namespace Billiard3D.Track
         /// <exception cref="ArgumentNullException">toThisReference</exception>
         public Vector3D ClosestPoint(Vector3D toThisReference)
         {
-            var v = toThisReference - PointA;
+            var v = toThisReference - BasePoint;
             var t = v * Direction.Normalize();
-            return PointA + t * Direction;
+            return BasePoint + t * Direction;
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Billiard3D.Track
         /// </summary>
         /// <param name="distance">The distance.</param>
         /// <returns></returns>
-        public Vector3D GetPointOnLine(double distance) => PointA + distance * Direction;
+        public Vector3D GetPointOnLine(double distance) => BasePoint + distance * Direction;
 
         /// <summary>
         ///     Gets the point on line assuming the given reference is already on the line
@@ -100,8 +100,8 @@ namespace Billiard3D.Track
         {
             unchecked
             {
-                var hashCode = PointB.GetHashCode();
-                hashCode = hashCode * 397 ^ PointA.GetHashCode();
+                var hashCode = SecondPoint.GetHashCode();
+                hashCode = hashCode * 397 ^ BasePoint.GetHashCode();
                 hashCode = hashCode * 397 ^ Direction.GetHashCode();
                 return hashCode;
             }
