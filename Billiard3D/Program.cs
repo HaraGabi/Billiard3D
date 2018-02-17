@@ -39,8 +39,8 @@
       {
          Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
 
-         //NearAutoCorrelation(50);
-         Kausztika();
+         NearAutoCorrelation(50);
+         //Kausztika();
          //ParallelAutoCorrelationSimulation();
          //VariableStartingPoint();
          //ParallelSimulation();
@@ -70,7 +70,8 @@
 
       private static void NearAutoCorrelation(double radius)
       {
-         var startingPoints = VeryCloseStartingPoints(2000);
+         var startingPoints = VeryCloseStartingPoints(2);
+         var distances = new List<List<Vector3D>>();
          Parallel.ForEach(startingPoints, (startLine, _, l) =>
          {
             var room = TrackFactory.RoomWithPlaneRoof(radius);
@@ -80,8 +81,11 @@
             lock (LockObject)
             {
                Console.WriteLine($"Done with {startLine.Direction}");
+               distances.Add(room.EveryHitpoint);
             }
          });
+         var distanc = distances[0].Zip(distances[1], (x, y) => Vector3D.AbsoluteValue(x - y));
+         File.WriteAllLines(@"C:\Users\haraszti\Desktop\szakdoga\NearAuto\kozel\dist.txt",distanc.Select(x => x.ToString()));
       }
 
       private static IEnumerable<Line> VeryCloseStartingPoints(int howMany)
@@ -89,7 +93,7 @@
          var startingDirection = (1, 1, 0);
          for (var i = 0; i < howMany; ++i)
          {
-            yield return Line.FromPointAndDirection(ChosenPoint + i * (Vector3D)(1e-17,1e-17,1e-17), startingDirection);
+            yield return Line.FromPointAndDirection(ChosenPoint + i * (Vector3D)(1e-14, 1e-14, 1e-14), startingDirection);
          }
       }
 
@@ -252,7 +256,7 @@
 
       private static void WriteSequence(Room finished, bool isTilted, string startingVelocity)
       {
-         var directory = @"C:\Workspaces\etc\szakdoga\autoCorr3" + $@"\{finished.Radius}\";
+         var directory = @"C:\Workspaces\etc\szakdoga\autoCorrKEVES" + $@"\{finished.Radius}\";
          Directory.CreateDirectory(directory);
 
          var sequenceDataName = directory + $@"\Sequence{startingVelocity}.txt";
