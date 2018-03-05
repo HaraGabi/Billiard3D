@@ -8,19 +8,17 @@ using System.Threading.Tasks;
 using Billiard3D.Track;
 using Billiard3D.VectorMath;
 using JetBrains.Annotations;
+using static System.Math;
 
 namespace Billiard3D
 {
-    using static Math;
-
     [UsedImplicitly]
     public class Programs
     {
-        private static readonly object LockObject = new object();
-
         private static Vector3D ChosenPoint { get; } = (15d, 320d, 328d);
 
         private static Random Rand { get; } = new Random();
+        private static readonly object LockObject = new object();
 
 
         [UsedImplicitly]
@@ -33,7 +31,51 @@ namespace Billiard3D
             //ParallelAutoCorrelationSimulation();
             //VariableStartingPoint();
             //ParallelSimulation();
-            VeryLong();
+            //VeryLong();
+            LimesRun();
+        }
+
+        private static void LimesRun()
+        {
+            var radii = new[] {0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1};
+            var startingPoint = CreateStartingPoints(1).First();
+            const string directoryPath = @"C:\Workspaces\etc\szakdoga\LongWithSmallRadii";
+            Parallel.ForEach(radii, radius =>
+            {
+                var room = TrackFactory.RoomWithPlaneRoof(radius);
+                room.NumberOfIterations = 10_000_000;
+                room.Start(startingPoint);
+
+                var specificPath = Path.Combine(directoryPath, radius.ToString(CultureInfo.InvariantCulture));
+                Writer(room, specificPath, FileMode.Create);
+            });
+        }
+
+        private static void Writer(Room room, string directory, FileMode mode)
+        {
+            Directory.CreateDirectory(directory);
+
+            void WriteToFile<T>(string name, IEnumerable<T> toWrite)
+            {
+                var fullPath = Path.Combine(directory, name);
+                using (var fileStream = new FileStream(fullPath, mode, FileAccess.Write))
+                {
+                    using (var writer = new StreamWriter(fileStream))
+                    {
+                        foreach (var word in toWrite)
+                        {
+                            writer.WriteLine(word.ToString());
+                        }
+                    }
+                }
+            }
+
+            const string sequenceName = "HitSequence.txt";
+            const string everyHitPointName = "HitPoints.txt";
+            
+            WriteToFile(sequenceName, room.HitSequence);
+            WriteToFile(everyHitPointName, room.EveryHitpoint);
+            room.Boundaries.ForEach(x => WriteToFile(x.BoundaryName + ".txt", x.HitPoints));
         }
 
         private static IEnumerable<Line> CreateStartingPoints(int howMany = 15)
@@ -207,8 +249,8 @@ namespace Billiard3D
 
         private static void VeryLong()
         {
-            var startPoints = CreateStartingPoints(1).ToList();//5000
-            var radii = new[] {0.02, 0.05, 0.007, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 5};//50,100
+            var startPoints = CreateStartingPoints(1).ToList(); //5000
+            var radii = new[] {0.02, 0.05, 0.007, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 5}; //50,100
             Parallel.ForEach(radii, radius =>
             {
                 foreach (var line in startPoints)

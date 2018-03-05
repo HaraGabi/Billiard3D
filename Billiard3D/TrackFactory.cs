@@ -219,7 +219,7 @@ namespace Billiard3D
                     var cylinder = CalculateCylinder(topLine, otherTopLine, wallLine, radius);
                     if (cylinders.Exists(x => x.Contains(cylinder.TopCenter) && x.Contains(cylinder.BottomCenter)))
                         continue;
-                    var name = "C" + index;
+                    var name = "C" + cylinders.Count;
                     cylinder.BoundaryName = name;
 
                     cylinders.Add(cylinder);
