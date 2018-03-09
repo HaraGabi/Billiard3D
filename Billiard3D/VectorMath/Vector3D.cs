@@ -158,7 +158,7 @@ namespace Billiard3D.VectorMath
 
         public Vector3D Normalize() => this / AbsoluteValue(this);
 
-        public override string ToString() => $"{X:#0.000} {Y:#0.000} {Z:#0.000}";
+        public override string ToString() => $"{X:e2} {Y:e2} {Z:e2}";
 
         private static bool IsNullVector(Vector3D vector) => vector.All(x => Abs(x) <= double.Epsilon);
     }

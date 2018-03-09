@@ -32,7 +32,8 @@ namespace Billiard3D
             //VariableStartingPoint();
             //ParallelSimulation();
             //VeryLong();
-            LimesRun();
+            //LimesRun();
+            ParallelStart(50);
         }
 
         private static void LimesRun()
@@ -115,6 +116,27 @@ namespace Billiard3D
             var distance = distances[0].Zip(distances[1], (x, y) => Vector3D.AbsoluteValue(x - y));
             File.WriteAllLines(@"C:\Users\haraszti\Desktop\szakdoga\NearAuto2\kozel\dist.txt",
                 distance.Select(x => x.ToString(CultureInfo.CurrentCulture)));
+        }
+
+        private static void ParallelStart(double radius)
+        {
+            var startingPoints = VeryCloseStartingPoints(15);
+            var distances = new List<List<Vector3D>>(15);
+            Parallel.ForEach(startingPoints, (startLine, _, l) =>
+            {
+                var room = TrackFactory.RoomWithPlaneRoof(radius);
+                room.NumberOfIterations = 2_000;
+                room.Start(startLine);
+                lock (LockObject)
+                {
+                    Console.WriteLine($"Done with {startLine.Direction}");
+                    distances.Add(room.EveryHitpoint);
+                    const string directory = @"C:\Workspaces\etc\szakdoga\kicsik";
+                    Directory.CreateDirectory(directory);
+                    var path = Path.Combine(directory, l + ".txt");
+                    File.WriteAllLines(path, room.EveryHitpoint.Select(x => x.ToString()));
+                }
+            });
         }
 
         private static IEnumerable<Line> VeryCloseStartingPoints(int howMany)
@@ -250,7 +272,7 @@ namespace Billiard3D
         private static void VeryLong()
         {
             var startPoints = CreateStartingPoints(1).ToList(); //5000
-            var radii = new[] {0.02, 0.05, 0.007, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 5}; //50,100
+            var radii = new[] { 60 };  //{0.02, 0.05, 0.007, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 5}; //50,100
             Parallel.ForEach(radii, radius =>
             {
                 foreach (var line in startPoints)
@@ -263,9 +285,11 @@ namespace Billiard3D
                     lock (LockObject)
                     {
                         //Directory.CreateDirectory(folderPath);
-                        Directory.CreateDirectory(@"C:\Users\haraszti\Desktop\szakdoga\varh");
-                        var filePath = $@"C:\Users\haraszti\Desktop\szakdoga\varh\seq{radius}.txt";
+                        Directory.CreateDirectory(@"C:\Users\haraszti\Desktop\szakdoga\march07\varh");
+                        var filePath = $@"C:\Users\haraszti\Desktop\szakdoga\march07\varh\seq{radius}.txt";
+                        var filePath2 = $@"C:\Users\haraszti\Desktop\szakdoga\march07\varh\HitSequence{radius}.txt";
                         File.WriteAllLines(filePath, room.EveryHitpoint.Select(x => x.ToString()));
+                        File.WriteAllLines(filePath2, room.HitSequence);
                         //foreach (var obj in room.Boundaries)
                         //{
                         //    var filePath = folderPath + $@"\{obj.BoundaryName}.txt";
