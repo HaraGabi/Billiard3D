@@ -31,9 +31,9 @@ namespace Billiard3D
             //ParallelAutoCorrelationSimulation();
             //VariableStartingPoint();
             //ParallelSimulation();
-            //VeryLong();
+            VeryLong();
             //LimesRun();
-            ParallelStart(50);
+            //ParallelStart(50);
         }
 
         private static void LimesRun()
@@ -65,7 +65,10 @@ namespace Billiard3D
                     {
                         foreach (var word in toWrite)
                         {
-                            writer.WriteLine(word.ToString());
+                            lock (LockObject)
+                            {
+                                writer.WriteLine(word.ToString());
+                            }
                         }
                     }
                 }
@@ -272,39 +275,16 @@ namespace Billiard3D
         private static void VeryLong()
         {
             var startPoints = CreateStartingPoints(1).ToList(); //5000
-            var radii = new[] { 60 };  //{0.02, 0.05, 0.007, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 5}; //50,100
-            Parallel.ForEach(radii, radius =>
+            var radii = new[] {0.02, 0.05, 0.007, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 5, 50, 100};
+            Parallel.ForEach(radii, (radius, _, l) =>
             {
                 foreach (var line in startPoints)
                 {
                     var room = TrackFactory.RoomWithPlaneRoof(radius);
                     room.NumberOfIterations = 100_000;
                     room.Start(line);
-                    var folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) +
-                                     $@"\TestLong{radius}";
-                    lock (LockObject)
-                    {
-                        //Directory.CreateDirectory(folderPath);
-                        Directory.CreateDirectory(@"C:\Users\haraszti\Desktop\szakdoga\march07\varh");
-                        var filePath = $@"C:\Users\haraszti\Desktop\szakdoga\march07\varh\seq{radius}.txt";
-                        var filePath2 = $@"C:\Users\haraszti\Desktop\szakdoga\march07\varh\HitSequence{radius}.txt";
-                        File.WriteAllLines(filePath, room.EveryHitpoint.Select(x => x.ToString()));
-                        File.WriteAllLines(filePath2, room.HitSequence);
-                        //foreach (var obj in room.Boundaries)
-                        //{
-                        //    var filePath = folderPath + $@"\{obj.BoundaryName}.txt";
-                        //    using (var file = new FileStream(filePath, FileMode.Append, FileAccess.Write))
-                        //    {
-                        //        using (var writer = new StreamWriter(file))
-                        //        {
-                        //            foreach (var hitPoint in obj.HitPoints)
-                        //            {
-                        //                writer.WriteLine(hitPoint);
-                        //            }
-                        //        }
-                        //    }
-                        //}
-                    }
+                    var folderPath = $@"C:\Workspaces\etc\szakdoga\radii\{l}";
+                    Writer(room, folderPath, FileMode.Create);
                 }
             });
         }
