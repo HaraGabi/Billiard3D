@@ -27,11 +27,11 @@ namespace Billiard3D
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
 
             //NearAutoCorrelation(50);
-            //Kausztika();
+            Kausztika();
             //ParallelAutoCorrelationSimulation();
             //VariableStartingPoint();
             //ParallelSimulation();
-            VeryLong();
+            //VeryLong();
             //LimesRun();
             //ParallelStart(50);
         }
@@ -154,24 +154,44 @@ namespace Billiard3D
 
         private static void Kausztika()
         {
-            var startingPoints = ParallelStartingPoints();
+            var startingPoints = CausticStartPoints();
             Parallel.ForEach(startingPoints, (startLine, _, i) =>
             {
                 var room = new Caustic();
                 var list = room.Start(startLine);
-                WriteCaustic(list);
-                WriteCaustic(list, i);
-                WriteCausticWithOnlyLast(list);
+                var name = startLine.Direction.ToString() + i;
+                WriteCaustic(list, name, i);
+                WriteCaustic(list, i, name);
+                WriteCausticWithOnlyLast(list, name, i);
             });
         }
 
-        private static void WriteCaustic(List<Vector3D> list)
+        private static IEnumerable<Line> CausticStartPoints()
         {
-            const string path = @"C:\Workspaces\etc\szakdoga\proba";
+            var points = new List<Line>(100_000_000);
+            for (var i = -100; i < 100; ++i)
+            {
+                for (var j = -100; j < 100; ++j)
+                {
+                    for (var y = 1; y < 50; ++y)
+                    {
+                        for (var z = 1; z < 50; ++z)
+                        {
+                            points.Add(Line.FromPointAndDirection((99, y, z), new Vector3D(-1, 0, 0) + new Vector3D(0, i, j)));
+                        }
+                    }
+                }
+            }
+            return points;
+        }
+
+        private static void WriteCaustic(List<Vector3D> list, string name, long l)
+        {
+            var path = $@"C:\Workspaces\etc\szakdoga\kausztikus{l}\";
             Directory.CreateDirectory(path);
             lock (LockObject)
             {
-                using (var fs = new FileStream(path + @"\Caustic.txt", FileMode.Append, FileAccess.Write))
+                using (var fs = new FileStream(path + $@"\{name}.txt", FileMode.Append, FileAccess.Write))
                 {
                     using (var writer = new StreamWriter(fs))
                     {
@@ -181,13 +201,13 @@ namespace Billiard3D
             }
         }
 
-        private static void WriteCaustic(List<Vector3D> list, long l)
+        private static void WriteCaustic(List<Vector3D> list, long l, string name)
         {
-            const string path = @"C:\Workspaces\etc\szakdoga\numberedSmall";
+            var path = $@"C:\Workspaces\etc\szakdoga\kausztikus\{l}\";
             Directory.CreateDirectory(path);
             lock (LockObject)
             {
-                using (var fs = new FileStream(path + $@"\Caustic{l}.txt", FileMode.Append, FileAccess.Write))
+                using (var fs = new FileStream(path + $@"\{name}{l}.txt", FileMode.Append, FileAccess.Write))
                 {
                     using (var writer = new StreamWriter(fs))
                     {
@@ -197,13 +217,13 @@ namespace Billiard3D
             }
         }
 
-        private static void WriteCausticWithOnlyLast(List<Vector3D> list)
+        private static void WriteCausticWithOnlyLast(IReadOnlyCollection<Vector3D> list, string name, long l)
         {
-            const string path = @"C:\Workspaces\etc\szakdoga";
+            var path = $@"C:\Workspaces\etc\szakdoga\kausztikus\{l}\";
             Directory.CreateDirectory(path);
             lock (LockObject)
             {
-                using (var fs = new FileStream(path + @"\CausticLast.txt", FileMode.Append, FileAccess.Write))
+                using (var fs = new FileStream(path + $@"\{name}Last.txt", FileMode.Append, FileAccess.Write))
                 {
                     using (var writer = new StreamWriter(fs))
                     {
@@ -214,13 +234,13 @@ namespace Billiard3D
             }
         }
 
-        private static IEnumerable<Line> ParallelStartingPoints()
+        private static IEnumerable<Line> ParallelStartingPoints(Vector3D direction)
         {
             for (var y = 1; y < 100; ++y)
             {
                 for (var z = 1; z < 100; ++z)
                 {
-                    yield return Line.FromPointAndDirection((99, y, z), (-1, 0, 0));
+                    yield return Line.FromPointAndDirection((99, y, z), (-1, 0, 0) + direction);
                 }
             }
         }
