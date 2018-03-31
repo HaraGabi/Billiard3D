@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Runtime.CompilerServices;
 using MathNet.Numerics.LinearAlgebra;
 
 namespace Billiard3D.VectorMath
@@ -15,6 +16,7 @@ namespace Billiard3D.VectorMath
             BasePoints = new[] {pointA, pointB, pointC};
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double DeterminePointPosition(Vector3D point)
         {
             var tildePoints = new[]

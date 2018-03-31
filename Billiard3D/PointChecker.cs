@@ -1,5 +1,6 @@
 ﻿using Billiard3D.VectorMath;
 using JetBrains.Annotations;
+using System.Runtime.CompilerServices;
 
 namespace Billiard3D
 {
@@ -15,6 +16,7 @@ namespace Billiard3D
         }
 
         [Pure]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsPointOnTheCorrectSide(Vector3D point)
         {
             var determinant = Plane.DeterminePointPosition(point);

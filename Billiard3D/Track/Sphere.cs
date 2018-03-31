@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Billiard3D.VectorMath;
+using System.Runtime.CompilerServices;
 using static System.Math;
 
 namespace Billiard3D.Track
@@ -24,6 +25,7 @@ namespace Billiard3D.Track
             Radius = radius;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Sphere other)
         {
             if (other is null) return false;
@@ -31,6 +33,7 @@ namespace Billiard3D.Track
             return Equals(Center, other.Center) && Radius.Equals(other.Radius);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
             var linePoint = line.BasePoint;
@@ -54,7 +57,7 @@ namespace Billiard3D.Track
             return results.Where(Checker.IsPointOnTheCorrectSide);
         }
 
-        //
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Line LineAfterHit(in Line incoming, in Vector3D hitPoint)
         {
             HitPoints.Add(hitPoint);
@@ -66,8 +69,10 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInCorrectPosition(Line ball) => Checker.IsPointOnTheCorrectSide(ball.BasePoint);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
             if (obj is null) return false;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Billiard3D.VectorMath;
 
 namespace Billiard3D.Track
@@ -26,6 +27,7 @@ namespace Billiard3D.Track
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Line other) => Equals(SecondPoint, other.SecondPoint) && Equals(BasePoint, other.BasePoint) &&
                                           Equals(Direction, other.Direction);
 
@@ -40,6 +42,7 @@ namespace Billiard3D.Track
         ///     or
         ///     direction
         /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Line FromPointAndDirection(Vector3D point, Vector3D direction)
         {
             var pointB = point + 1.26 * direction;
@@ -52,6 +55,7 @@ namespace Billiard3D.Track
         /// <param name="point">The point.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">point</exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double DistanceFrom(Vector3D point)
         {
             var topValue = Math.Pow(Vector3D.AbsoluteValue(Vector3D.CrossProduct(Direction, BasePoint - point)), 2);
@@ -67,6 +71,7 @@ namespace Billiard3D.Track
         /// <param name="toThisReference">To this reference.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">toThisReference</exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector3D ClosestPoint(Vector3D toThisReference)
         {
             var v = toThisReference - BasePoint;
@@ -79,6 +84,7 @@ namespace Billiard3D.Track
         /// </summary>
         /// <param name="distance">The distance.</param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector3D GetPointOnLine(double distance) => BasePoint + distance * Direction;
 
         /// <summary>
@@ -87,9 +93,11 @@ namespace Billiard3D.Track
         /// <param name="referencePoint">The reference point.</param>
         /// <param name="distance">The distance.</param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector3D GetPointOnLine(Vector3D referencePoint, double distance) =>
             referencePoint + distance * Direction;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
             if (obj is null) return false;

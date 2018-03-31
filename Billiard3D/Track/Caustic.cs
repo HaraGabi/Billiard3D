@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Billiard3D.VectorMath;
 
 namespace Billiard3D.Track
@@ -42,6 +43,7 @@ namespace Billiard3D.Track
                 {frontWall, backWall, rightWall, leftWall, floor, ceiling, sphere});
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public List<Vector3D> Start(Line startLine)
         {
             var currentLine = startLine;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Billiard3D.VectorMath;
 
@@ -18,6 +19,7 @@ namespace Billiard3D.Track
             Cylinder = new Cylinder((0, 0, 0), (0, 100, 0), pcs, r);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Line Start(Line startPoint)
         {
             var intersectionPoints = Cylinder.GetIntersectionPoints(in startPoint);

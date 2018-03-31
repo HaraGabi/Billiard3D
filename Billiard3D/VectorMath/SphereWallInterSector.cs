@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Billiard3D.Track;
 using JetBrains.Annotations;
 
@@ -7,6 +8,7 @@ namespace Billiard3D.VectorMath
 {
     internal static class SphereWallInterSector
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3D GetInterSection([NotNull] this Sphere sphere, [NotNull] Wall wall)
         {
             if (sphere is null) throw new ArgumentNullException(nameof(sphere));

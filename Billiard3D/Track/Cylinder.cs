@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Billiard3D.VectorMath;
 
 namespace Billiard3D.Track
@@ -39,6 +40,7 @@ namespace Billiard3D.Track
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Cylinder other)
         {
             if (other is null) return false;
@@ -51,6 +53,7 @@ namespace Billiard3D.Track
         /// </summary>
         /// <param name="line"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
             var baseLine = new Line(TopCenter, BottomCenter);
@@ -78,6 +81,7 @@ namespace Billiard3D.Track
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Line LineAfterHit(in Line incoming, in Vector3D hitPoint)
         {
             HitPoints.Add(hitPoint);
@@ -90,8 +94,10 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInCorrectPosition(Line ball) => Checker.IsPointOnTheCorrectSide(ball.BasePoint);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool InsideTheCylinder(in Vector3D point)
         {
             var baseLine = new Line(TopCenter, BottomCenter);
@@ -103,6 +109,7 @@ namespace Billiard3D.Track
             return Math.Abs(distanceFromBottom + distanceFromTop - _cylinderHeight) < Confidence;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
             if (obj is null) return false;

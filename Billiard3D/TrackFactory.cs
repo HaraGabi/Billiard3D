@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Billiard3D.Track;
 using Billiard3D.VectorMath;
 using JetBrains.Annotations;
@@ -14,6 +15,7 @@ namespace Billiard3D
         private const double HeightHigher = 657.0;
         private const double HeightLower = 215.0;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Room RoomWithPlaneRoof(double radius)
         {
             var walls = CreateWalls();
@@ -23,7 +25,7 @@ namespace Billiard3D
             return new Room(walls, radius);
         }
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<ITrackBoundary> CreateWalls()
         {
             var firstRightBottom = (0D, 0d, 0d);
@@ -73,6 +75,7 @@ namespace Billiard3D
             return new List<Wall> {frontWall, oppositeWall, rightWall, leftWall, roof, floor};
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Room RoomWithTiltedRoof(double radius)
         {
             var firstRightBottom = (0D, 0d, 0d);
@@ -103,6 +106,7 @@ namespace Billiard3D
         }
 
         [Pure]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int AddSphere(List<Sphere> spheres, int index, Sphere sphere)
         {
             if (spheres.Exists(x => x.Center == sphere.Center))
@@ -117,6 +121,7 @@ namespace Billiard3D
         }
 
         [Pure]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Sphere CreateSphereBarrier(IEnumerable<ITrackBoundary> trackObjects, [NotNull] Sphere sphere)
         {
             if (sphere == null) throw new ArgumentNullException(nameof(sphere));
@@ -136,6 +141,7 @@ namespace Billiard3D
         }
 
         [Pure]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static List<ITrackBoundary> CreateSpheres(List<ITrackBoundary> trackObjects, double radius)
         {
             var cylinders = trackObjects.OfType<Cylinder>();
@@ -155,6 +161,7 @@ namespace Billiard3D
         }
 
         [Pure]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Cylinder CalculateCylinder(Line first, Line second, Line wallLine, double radius)
         {
             var angle = Vector3D.Angle(first.Direction, second.Direction);
@@ -193,6 +200,7 @@ namespace Billiard3D
         }
 
         [Pure]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static List<ITrackBoundary> CreateCylinders(List<ITrackBoundary> objects, double radius)
         {
             var cylinders = new List<Cylinder>(12);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Billiard3D.VectorMath;
 using static Billiard3D.VectorMath.Vector3D;
 
@@ -37,6 +38,7 @@ namespace Billiard3D.Track
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
             if (Math.Abs(line.Direction * NormalVector) < Confidence) return Enumerable.Empty<Vector3D>();
@@ -48,6 +50,7 @@ namespace Billiard3D.Track
             return hitPoint;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Line LineAfterHit(in Line incoming, in Vector3D hitPoint)
         {
             HitPoints.Add(hitPoint);
@@ -56,8 +59,10 @@ namespace Billiard3D.Track
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInCorrectPosition(Line ball) => false;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool OnTheWall(Vector3D hitPoint)
         {
             var maxX = Corners.Max(x => x.X);
@@ -84,6 +89,7 @@ namespace Billiard3D.Track
             return inBetween;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool CheckIfPointIsOnThePlain((double x, double y, double z) point)
         {
             const double confidence = 0.000001;

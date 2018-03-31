@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Billiard3D.VectorMath;
 using JetBrains.Annotations;
 
@@ -26,6 +27,7 @@ namespace Billiard3D.Track
             Radius = radius;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Start(Line startLine)
         {
             var currentLine = startLine;
@@ -53,6 +55,7 @@ namespace Billiard3D.Track
         }
 
         [Pure]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Selector(ITrackBoundary trackBoundary)
         {
             switch (trackBoundary)
