@@ -37,7 +37,8 @@ namespace Billiard3D
             //VeryLong();
             //LimesRun();
             //ParallelStart(0.05);
-            CylinderCaustic();
+            //CylinderCaustic();
+            SphereCaustic2();
         }
 
         private static void CylinderCaustic()
@@ -47,7 +48,62 @@ namespace Billiard3D
             {
                 var causticCylinder = new CausticCylinder();
                 var line = causticCylinder.Start(startLine);
-                Writer(line, "C:\\Workspaces\\etc\\szakdoga\\CAUSTICYLINDER2", "PointTable.txt");
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICYLINDER2", "PointTable.txt");
+            }
+        }
+
+        private static void SphereCaustic2()
+        {
+            var startingPoints = SphereStart2(0, 500, 500);
+            foreach (var startingPoint in startingPoints)
+            {
+                var sphere2 = new CausticSphere2();
+                var line = sphere2.Start(startingPoint);
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE2", "PointTable.txt");
+         }
+
+        }
+
+        private static IEnumerable<Line> SphereStart2(double alpha, int xLimit, int yLimit)
+        {
+            var inRadian = alpha.ToRadian();
+            var dx = Tan(inRadian);
+            var xRange = Numpy.LinSpace(-1, 1, xLimit).ToList();
+            var yRange = Numpy.LinSpace(-1, 1, yLimit).ToList();
+            foreach (var x in xRange)
+            {
+                foreach (var y in yRange)
+                {
+                    yield return Line.FromPointAndDirection((x - dx, y, 1), (dx, 0, -1));
+                }
+            }
+        }
+
+        private static void SphereCaustic()
+        {
+            var startLines = CreateSphereCausticStartLines();
+            foreach (var startLine in startLines)
+            {
+                var causticSphere = new CausticSphere();
+                var line = causticSphere.Start(startLine);
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE", "PointTable.txt");
+            }
+        }
+
+        private static IEnumerable<Line> CreateSphereCausticStartLines()
+        {
+            const double dx = 0.5;
+            const double dy = 0.5;
+            var startX = Sqrt(50 * 50 + 50 * 50) - 50;
+            var y = 0.0 - dy;
+            var plane = new Plane((50, 50, 0), (50, 0, 50), (0, 50, 50));
+            for (var x = 50 - startX; x > startX; x -= dx)
+            {
+                y += dy;
+                for (var z = startX; z < 50 - startX; z += dx)
+                {
+                    yield return Line.FromPointAndDirection((x, y, z), -1 * plane.NormalVector);
+                }
             }
         }
 
