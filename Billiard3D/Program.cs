@@ -38,7 +38,10 @@ namespace Billiard3D
             //LimesRun();
             //ParallelStart(0.05);
             //CylinderCaustic();
-            SphereCaustic2();
+            var alpha = new double[]{ 0, 45, 89 };
+            const int from = 0;
+            const int to = 3;
+            Parallel.For(from, to, i => { SphereCaustic2(alpha[i]); });
         }
 
         private static void CylinderCaustic()
@@ -52,14 +55,15 @@ namespace Billiard3D
             }
         }
 
-        private static void SphereCaustic2()
+        private static void SphereCaustic2(double alpha)
         {
-            var startingPoints = SphereStart2(0, 500, 500);
+            var startingPoints = SphereStart2(alpha, 500, 500);
             foreach (var startingPoint in startingPoints)
             {
                 var sphere2 = new CausticSphere2();
                 var line = sphere2.Start(startingPoint);
-                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE2", "PointTable.txt");
+                if (line is Line validLine)
+                Writer(validLine, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE5", $"PointTable{alpha}.txt");
          }
 
         }
@@ -74,7 +78,8 @@ namespace Billiard3D
             {
                 foreach (var y in yRange)
                 {
-                    yield return Line.FromPointAndDirection((x - dx, y, 1), (dx, 0, -1));
+                    if (x * x + y * y >= 1) continue;
+                    yield return Line.FromPointAndDirection((x - dx, y, 2), (dx, 0, -1));
                 }
             }
         }
