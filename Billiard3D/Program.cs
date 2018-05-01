@@ -38,37 +38,44 @@ namespace Billiard3D
             //LimesRun();
             //ParallelStart(0.05);
             //CylinderCaustic();
-            var alpha = new double[]{ 0, 45, 89 };
+
+
+            var alpha = new double[] { 0, 45, 89 };
             const int from = 0;
             const int to = 3;
-            Parallel.For(from, to, i => { SphereCaustic2(alpha[i]); });
+            Parallel.For(from, to, i => { CylinderCaustic(alpha[i]); });
+
+
+
+            //var alpha = new double[]{ 0, 45, 89 };
+            //const int from = 0;
+            //const int to = 3;
+            //Parallel.For(from, to, i => { SphereCaustic2(alpha[i]); });
         }
 
-        private static void CylinderCaustic()
+        private static void CylinderCaustic(double alpha)
         {
-            var startLines = CreateCylinderStartLines(25);
+            var startLines = CreateCylinderStartLines(alpha, 500, 100).ToList();
             foreach (var startLine in startLines)
             {
                 var causticCylinder = new CausticCylinder();
                 var line = causticCylinder.Start(startLine);
-                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICYLINDER2", "PointTable.txt");
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICYLINDERMINE", $"PointTable{alpha}.txt");
             }
         }
 
         private static void SphereCaustic2(double alpha)
         {
-            var startingPoints = SphereStart2(alpha, 500, 500);
+            var startingPoints = SphereStart(alpha, 500, 500);
             foreach (var startingPoint in startingPoints)
             {
-                var sphere2 = new CausticSphere2();
+                var sphere2 = new CausticSphere();
                 var line = sphere2.Start(startingPoint);
-                if (line is Line validLine)
-                Writer(validLine, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE5", $"PointTable{alpha}.txt");
-         }
-
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE5", $"PointTable{alpha}.txt");
+            }
         }
 
-        private static IEnumerable<Line> SphereStart2(double alpha, int xLimit, int yLimit)
+        private static IEnumerable<Line> SphereStart(double alpha, int xLimit, int yLimit)
         {
             var inRadian = alpha.ToRadian();
             var dx = Tan(inRadian);
@@ -78,36 +85,12 @@ namespace Billiard3D
             {
                 foreach (var y in yRange)
                 {
-                    if (x * x + y * y >= 1) continue;
+                    if (x * x + y * y >= 1)
+                    {
+                        continue;
+                    }
+
                     yield return Line.FromPointAndDirection((x - dx, y, 2), (dx, 0, -1));
-                }
-            }
-        }
-
-        private static void SphereCaustic()
-        {
-            var startLines = CreateSphereCausticStartLines();
-            foreach (var startLine in startLines)
-            {
-                var causticSphere = new CausticSphere();
-                var line = causticSphere.Start(startLine);
-                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE", "PointTable.txt");
-            }
-        }
-
-        private static IEnumerable<Line> CreateSphereCausticStartLines()
-        {
-            const double dx = 0.5;
-            const double dy = 0.5;
-            var startX = Sqrt(50 * 50 + 50 * 50) - 50;
-            var y = 0.0 - dy;
-            var plane = new Plane((50, 50, 0), (50, 0, 50), (0, 50, 50));
-            for (var x = 50 - startX; x > startX; x -= dx)
-            {
-                y += dy;
-                for (var z = startX; z < 50 - startX; z += dx)
-                {
-                    yield return Line.FromPointAndDirection((x, y, z), -1 * plane.NormalVector);
                 }
             }
         }
@@ -124,6 +107,22 @@ namespace Billiard3D
                 {
                     yield return Line.FromPointAndDirection((x * Cos(45.0.ToRadian()), y, -x * Sin(45.0.ToRadian())),
                         new Vector3D(1, 0, 1).Normalize());
+                }
+            }
+        }
+
+        private static IEnumerable<Line> CreateCylinderStartLines(double alpha, int zLimit, int yLimit)
+        {
+            var inRadian = alpha.ToRadian();
+            var dz = Tan(inRadian);
+            var zRange = Numpy.LinSpace(-CausticCylinder.R, CausticCylinder.R, zLimit);
+            var yRange = Numpy.LinSpace(0, CausticCylinder.L, yLimit);
+            foreach (var z in zRange)
+            {
+                foreach (var y in yRange)
+                {
+                    if (Abs(Abs(z) - Abs(CausticCylinder.R)) <= 5e-5 || Abs(y) <= 5e-5 || Abs(y - 100) <= 5e-5) continue;
+                    yield return Line.FromPointAndDirection((CausticCylinder.R, y, z - dz), (-1, 0, dz));
                 }
             }
         }
@@ -148,11 +147,11 @@ namespace Billiard3D
         {
             Directory.CreateDirectory(directory);
             var fullPath = Path.Combine(directory, name);
-            using (var fileSteam = new FileStream(fullPath, FileMode.Append, FileAccess.Write))
+            lock (LockObject)
             {
-                using (var writer = new StreamWriter(fileSteam))
+                using (var fileSteam = new FileStream(fullPath, FileMode.Append, FileAccess.Write))
                 {
-                    lock (LockObject)
+                    using (var writer = new StreamWriter(fileSteam))
                     {
                         writer.WriteLine($"{line.BasePoint}\t{line.Direction}");
                     }
