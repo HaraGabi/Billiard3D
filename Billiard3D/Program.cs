@@ -16,7 +16,7 @@ namespace Billiard3D
     using System.Collections.Concurrent;
 
     [UsedImplicitly]
-    public class Programs
+    public class Program
     {
         private static Vector3D ChosenPoint { get; } = (15d, 320d, 328d);
 
