@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -8,13 +9,10 @@ using System.Threading.Tasks;
 using Billiard3D.Track;
 using Billiard3D.VectorMath;
 using JetBrains.Annotations;
-using MathNet.Numerics;
 using static System.Math;
 
 namespace Billiard3D
 {
-    using System.Collections.Concurrent;
-
     [UsedImplicitly]
     public class Program
     {
@@ -39,12 +37,16 @@ namespace Billiard3D
             //ParallelStart(0.05);
             //CylinderCaustic();
 
-
-            var alpha = new double[] { 0, 45, 89 };
+            var alpha = new double[] {0, 45, 89};
             const int from = 0;
             const int to = 3;
-            Parallel.For(from, to, i => { CylinderCaustic(alpha[i]); });
+            Parallel.For(from, to, i => { SphereCaustic3(alpha[i]); });
 
+
+            //var alpha = new double[] { 0, 45, 89 };
+            //   const int from = 0;
+            //   const int to = 3;
+            //   Parallel.For(from, to, i => { CylinderCaustic(alpha[i]); });
 
 
             //var alpha = new double[]{ 0, 45, 89 };
@@ -75,6 +77,35 @@ namespace Billiard3D
             }
         }
 
+        private static void SphereCaustic3(double alpha)
+        {
+            var startingPoints = SphereStart2(alpha, 500, 500, 8);
+            foreach (var startingPoint in startingPoints)
+            {
+                var sphere2 = new CausticSphere(8);
+                var line = sphere2.Start(startingPoint);
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE5", $"PointTableOctave{alpha}.txt");
+            }
+        }
+
+        private static IEnumerable<Line> SphereStart2(double alpha, int xLimit, int yLimit, double octave)
+        {
+            var r = 1 - Sqrt(Pow(CausticSphere.R, 2) - Pow(CausticSphere.R / octave, 2));
+            var inRadian = alpha.ToRadian();
+            var dx = Tan(inRadian) * r;
+            var xRange = Numpy.LinSpace(-r, r, xLimit).ToList();
+            var yRange = Numpy.LinSpace(-r, r, yLimit).ToList();
+            foreach (var x in xRange)
+            {
+                foreach (var y in yRange)
+                {
+                    if (x * x + y * y >= r) continue;
+
+                    yield return Line.FromPointAndDirection((x - dx, y, -r + 1), (dx, 0, -1));
+                }
+            }
+      }
+
         private static IEnumerable<Line> SphereStart(double alpha, int xLimit, int yLimit)
         {
             var inRadian = alpha.ToRadian();
@@ -85,10 +116,7 @@ namespace Billiard3D
             {
                 foreach (var y in yRange)
                 {
-                    if (x * x + y * y >= 1)
-                    {
-                        continue;
-                    }
+                    if (x * x + y * y >= 1) continue;
 
                     yield return Line.FromPointAndDirection((x - dx, y, 2), (dx, 0, -1));
                 }
@@ -99,8 +127,8 @@ namespace Billiard3D
         {
             const double dx = 0.5;
             const int dy = 1;
-            var startX = (-Sqrt(2) / 2) * r;
-            var endX = (Sqrt(2) / 2) * r;
+            var startX = -Sqrt(2) / 2 * r;
+            var endX = Sqrt(2) / 2 * r;
             for (var x = startX; x < endX; x += dx)
             {
                 for (var y = 0; y < 100; y += dy)
@@ -115,22 +143,23 @@ namespace Billiard3D
         {
             var inRadian = alpha.ToRadian();
             var dz = Tan(inRadian);
-            var R = Sqrt(Pow(CausticCylinder.R, 2) - Pow(CausticCylinder.R / quarter, 2));
-            var zRange = Numpy.LinSpace(-R, R, zLimit);
-            var yRange = Numpy.LinSpace(0, CausticCylinder.L, yLimit);
+            var r = Sqrt(Pow(CausticCylinder.R, 2) - Pow(CausticCylinder.R / quarter, 2));
+            var zRange = Numpy.LinSpace(-r, r, zLimit).ToList();
+            var yRange = Numpy.LinSpace(0, CausticCylinder.L, yLimit).ToList();
             foreach (var z in zRange)
             {
                 foreach (var y in yRange)
                 {
-                    if (Abs(Abs(z) - Abs(R)) <= 5e-5 || Abs(y) <= 5e-5 || Abs(y - CausticCylinder.L) <= 5e-5) continue;
-                    yield return Line.FromPointAndDirection((R, y, z - dz), (-1, 0, dz));
+                    if (Abs(Abs(z) - Abs(r)) <= 5e-5 || Abs(y) <= 5e-5 || Abs(y - CausticCylinder.L) <= 5e-5) continue;
+                    yield return Line.FromPointAndDirection((-CausticCylinder.R / quarter, y, z), (-1, 0, dz));
                 }
             }
         }
 
         private static void LimesRun()
         {
-            var radii = new[] { 50, 100, 150, 200, 250, 300 };//{0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1};
+            var radii = new[]
+                {50, 100, 150, 200, 250, 300}; //{0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1};
             var startingPoint = CreateStartingPoints(1).First();
             const string directoryPath = @"C:\Workspaces\etc\szakdoga\LongWithSmallRadii10";
             Parallel.ForEach(radii, radius =>
@@ -148,11 +177,11 @@ namespace Billiard3D
         {
             Directory.CreateDirectory(directory);
             var fullPath = Path.Combine(directory, name);
-            lock (LockObject)
+            using (var fileSteam = new FileStream(fullPath, FileMode.Append, FileAccess.Write))
             {
-                using (var fileSteam = new FileStream(fullPath, FileMode.Append, FileAccess.Write))
+                using (var writer = new StreamWriter(fileSteam))
                 {
-                    using (var writer = new StreamWriter(fileSteam))
+                    lock (LockObject)
                     {
                         writer.WriteLine($"{line.BasePoint}\t{line.Direction}");
                     }
@@ -211,7 +240,7 @@ namespace Billiard3D
 
             const string sequenceName = "HitSequence.txt";
             const string everyHitPointName = "HitPoints.txt";
-            
+
             WriteToFile(sequenceName, room.HitSequence);
             WriteToFile(everyHitPointName, room.EveryHitpoint);
             room.Boundaries.ForEach(x => WriteToFile(x.BoundaryName + ".txt", x.HitPoints));
@@ -270,6 +299,7 @@ namespace Billiard3D
                     Console.WriteLine($"Done with {startLine.Direction}");
                     distances.Add(room.EveryHitpoint);
                 }
+
                 var directory = $@"C:\Workspaces\etc\szakdoga\kicsik2tized4\{l}";
                 Directory.CreateDirectory(directory);
                 Writer(room, directory, FileMode.Create);
@@ -330,7 +360,8 @@ namespace Billiard3D
                     {
                         for (var z = 1; z < 10; ++z)
                         {
-                            points.Add(Line.FromPointAndDirection((99, y, z), new Vector3D(-1, 0, 0) + new Vector3D(0, i, j)));
+                            points.Add(Line.FromPointAndDirection((99, y, z),
+                                new Vector3D(-1, 0, 0) + new Vector3D(0, i, j)));
                         }
                     }
                 }
