@@ -55,12 +55,12 @@ namespace Billiard3D
 
         private static void CylinderCaustic(double alpha)
         {
-            var startLines = CreateCylinderStartLines(alpha, 500, 100).ToList();
+            var startLines = CreateCylinderStartLines(alpha, 500, 100, 4).ToList();
             foreach (var startLine in startLines)
             {
-                var causticCylinder = new CausticCylinder();
+                var causticCylinder = new CausticCylinder(4);
                 var line = causticCylinder.Start(startLine);
-                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICYLINDERMINE", $"PointTable{alpha}.txt");
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICYLINDERMINE", $"PointTableQuarter{alpha}.txt");
             }
         }
 
@@ -111,18 +111,19 @@ namespace Billiard3D
             }
         }
 
-        private static IEnumerable<Line> CreateCylinderStartLines(double alpha, int zLimit, int yLimit)
+        private static IEnumerable<Line> CreateCylinderStartLines(double alpha, int zLimit, int yLimit, double quarter)
         {
             var inRadian = alpha.ToRadian();
             var dz = Tan(inRadian);
-            var zRange = Numpy.LinSpace(-CausticCylinder.R, CausticCylinder.R, zLimit);
+            var R = Sqrt(Pow(CausticCylinder.R, 2) - Pow(CausticCylinder.R / quarter, 2));
+            var zRange = Numpy.LinSpace(-R, R, zLimit);
             var yRange = Numpy.LinSpace(0, CausticCylinder.L, yLimit);
             foreach (var z in zRange)
             {
                 foreach (var y in yRange)
                 {
-                    if (Abs(Abs(z) - Abs(CausticCylinder.R)) <= 5e-5 || Abs(y) <= 5e-5 || Abs(y - 100) <= 5e-5) continue;
-                    yield return Line.FromPointAndDirection((CausticCylinder.R, y, z - dz), (-1, 0, dz));
+                    if (Abs(Abs(z) - Abs(R)) <= 5e-5 || Abs(y) <= 5e-5 || Abs(y - CausticCylinder.L) <= 5e-5) continue;
+                    yield return Line.FromPointAndDirection((R, y, z - dz), (-1, 0, dz));
                 }
             }
         }

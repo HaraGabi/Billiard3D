@@ -10,12 +10,22 @@ namespace Billiard3D.Track
         public static double R { get; set; } = 1;
         public static double L { get; set; } = 100;
         public Cylinder Cylinder { get; }
+
         public CausticCylinder()
         {
             var plane = new Plane((0, 0, 0), (0, L, 0), (0, L, L));
             var sign = plane.DeterminePointPosition((-1, 0, 0)) > 0 ? +1 : -1;
             var pcs = new PointChecker(plane, sign);
             Cylinder = new Cylinder((0, 0, 0), (0, L, 0), pcs, R);
+        }
+
+        public CausticCylinder(double quarter)
+        {
+            var newPlane = -R / quarter;
+            var plane = new Plane((newPlane, 0, 0), (newPlane, L, 0), (newPlane, L, L));
+            var sign = plane.DeterminePointPosition((-1, 0, 0 )) > 0 ? +1 : -1;
+            var checker = new PointChecker(plane, sign);
+            Cylinder = new Cylinder((0, 0, 0), (0, L, 0), checker, R);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
