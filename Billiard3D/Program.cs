@@ -40,7 +40,7 @@ namespace Billiard3D
             var alpha = new double[] {0, 45, 89};
             const int from = 0;
             const int to = 3;
-            Parallel.For(from, to, i => { SphereCaustic3(alpha[i]); });
+            Parallel.For(from, to, i => { OctoSphereCaustic(alpha[i]); });
 
 
             //var alpha = new double[] { 0, 45, 89 };
@@ -77,9 +77,9 @@ namespace Billiard3D
             }
         }
 
-        private static void SphereCaustic3(double alpha)
+        private static void OctoSphereCaustic(double alpha)
         {
-            var startingPoints = SphereStart2(alpha, 500, 500, 8);
+            var startingPoints = OctoSphereStart(alpha, 500, 500);
             foreach (var startingPoint in startingPoints)
             {
                 var sphere2 = new CausticSphere(8);
@@ -88,9 +88,9 @@ namespace Billiard3D
             }
         }
 
-        private static IEnumerable<Line> SphereStart2(double alpha, int xLimit, int yLimit, double octave)
+        private static IEnumerable<Line> OctoSphereStart(double alpha, int xLimit, int yLimit)
         {
-            var r = 1 - Sqrt(Pow(CausticSphere.R, 2) - Pow(CausticSphere.R / octave, 2));
+            var r = 1 - Sqrt(Pow(CausticSphere.R, 2) - Pow(CausticSphere.R / 8, 2));
             var inRadian = alpha.ToRadian();
             var dx = Tan(inRadian) * r;
             var xRange = Numpy.LinSpace(-r, r, xLimit).ToList();
