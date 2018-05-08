@@ -90,18 +90,22 @@ namespace Billiard3D
 
         private static IEnumerable<Line> OctoSphereStart(double alpha, int xLimit, int yLimit)
         {
-            var r = 1 - Sqrt(Pow(CausticSphere.R, 2) - Pow(CausticSphere.R / 8, 2));
             var inRadian = alpha.ToRadian();
-            var dx = Tan(inRadian) * r;
-            var xRange = Numpy.LinSpace(-r, r, xLimit).ToList();
-            var yRange = Numpy.LinSpace(-r, r, yLimit).ToList();
-            foreach (var x in xRange)
+            var sideLine = new Line((2, 0, 2), (0, 2, 2));
+            var sideDistance = Vector3D.AbsoluteValue(sideLine.SecondPoint - sideLine.BasePoint);
+            var sideRange = Numpy.LinSpace(0, sideDistance, xLimit).ToList();
+            var zRange = Numpy.LinSpace(0, 2, yLimit).ToList();
+            foreach (var x in sideRange)
             {
-                foreach (var y in yRange)
+                foreach (var z in zRange)
                 {
-                    if (x * x + y * y >= r) continue;
+                    if (x * x + z * z >= 0) continue;
 
-                    yield return Line.FromPointAndDirection((x - dx, y, -r + 1), (dx, 0, -1));
+                    var side = sideLine.GetPointOnLine(x);
+                    var direction = (new Vector3D(0, 0, 1) - (1, 1, 1)).Normalize();
+                    var rotatedDirection = new Vector3D(direction.X * Cos(inRadian) - direction.Y * Sin(inRadian),
+                        direction.X * Sin(inRadian) + direction.Y * Cos(inRadian), direction.Z);
+                    yield return Line.FromPointAndDirection((side.X, side.Y, z), rotatedDirection);
                 }
             }
       }

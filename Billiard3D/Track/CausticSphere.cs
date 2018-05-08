@@ -23,9 +23,9 @@ namespace Billiard3D.Track
 
         public CausticSphere(double octave)
         {
-            var sphere = new Sphere((0, 0, 1), R);
-            var position = 1 / octave;
-            var plane = new Plane((position, 0, 1 + position), (0, position, 1 + position), (position, position, 0));
+            var sphere = new Sphere((1, 1, 1), R);
+            var position = 1 / R;
+            var plane = new Plane((position, 0, position), (0, position, position), (position, position, 0));
             var sign = plane.DeterminePointPosition((0, 0, 0)) > 0 ? +1 : -1;
             var checker = new PointChecker(plane, sign);
             sphere.Checker = checker;
