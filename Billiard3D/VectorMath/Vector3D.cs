@@ -71,7 +71,7 @@ namespace Billiard3D.VectorMath
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Angle(Vector3D lValue, Vector3D rValue)
         {
-            if (IsNullVector(lValue) || IsNullVector(lValue))
+            if (IsNullVector(lValue) || IsNullVector(rValue))
                 return 90.0.ToRadian();
             var absL = AbsoluteValue(lValue);
             var absR = AbsoluteValue(rValue);
