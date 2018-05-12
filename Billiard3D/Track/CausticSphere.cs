@@ -35,7 +35,8 @@ namespace Billiard3D.Track
         public Line Start(Line startPoint)
         {
             var intersectionPoints = Sphere.GetIntersectionPoints(in startPoint).ToList();
-            if (intersectionPoints.Count > 1) throw new InvalidOperationException();
+            if (intersectionPoints.Count > 1) return new Line((-90, -90, -90), (-99, -99, -99));
+         if (intersectionPoints.Count != 1) return new Line((-90, -90, -90), (-99, -99, -99));
             var intersect = intersectionPoints.Single();
             var line = Sphere.LineAfterHit(in startPoint, in intersect);
             return line;

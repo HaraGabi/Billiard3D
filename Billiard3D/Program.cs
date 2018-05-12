@@ -79,38 +79,55 @@ namespace Billiard3D
 
         private static void OctoSphereCaustic(double alpha)
         {
-            var startingPoints = OctoSphereStart(alpha, 500, 500);
+            var startingPoints = OctoSphereStart(alpha, 500, 500).ToList();
             foreach (var startingPoint in startingPoints)
             {
                 var sphere2 = new CausticSphere(8);
                 var line = sphere2.Start(startingPoint);
-                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE5", $"PointTableOctave{alpha}.txt");
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE6", $"PointTableOctave{alpha}.txt");
             }
         }
 
         private static IEnumerable<Line> OctoSphereStart(double alpha, int xLimit, int yLimit)
         {
-            var inRadian = alpha.ToRadian();
-            var sideLine = new Line((2, 0, 2), (0, 2, 2));
-            var sideDistance = Vector3D.AbsoluteValue(sideLine.SecondPoint - sideLine.BasePoint);
-            var sideRange = Numpy.LinSpace(0, sideDistance, xLimit).ToList();
-            var zRange = Numpy.LinSpace(0, 2, yLimit).ToList();
-            foreach (var x in sideRange)
-            {
-                foreach (var z in zRange)
-                {
-                    if (x * x + z * z >= 0) continue;
+            var origin = new Vector3D(0, 0, 0);
+            var planePoint = new Vector3D(1, 1, 0);
+            var pointA = new Vector3D(2, 0, 2);
+            var pointB = new Vector3D(0, 2, 2);
+            var distanceFromOriginAtTheBase = Vector3D.AbsoluteValue(planePoint - origin);
+            var distanceFromOriginAtTheBaseOnTheXAxis = distanceFromOriginAtTheBase / Sin(45.0.ToRadian());
+            var pointOnXAxisOnTheBase = new Vector3D(distanceFromOriginAtTheBaseOnTheXAxis, 0.0, 0.0);
+            var horizontalDistanceAtTop = Vector3D.AbsoluteValue(pointB - pointA);
+            var halfDistanceAtTop = horizontalDistanceAtTop / 2;
+            var horizontalDirection = (planePoint - pointOnXAxisOnTheBase).Normalize();
+            var halfPoint = pointA + halfDistanceAtTop *
+                            horizontalDirection;
+            var verticalDistance = Vector3D.AbsoluteValue(planePoint - halfPoint);
+            var verticalDirection = (planePoint - halfPoint).Normalize();
+            var horizontalJumps = Numpy.LinSpace(0, horizontalDistanceAtTop, xLimit).ToList();
+            var verticalJumps = Numpy.LinSpace(0, verticalDistance, yLimit).ToList();
+            var mainDirection = origin - (1, 1, 1);
 
-                    var side = sideLine.GetPointOnLine(x);
-                    var direction = (new Vector3D(0, 0, 1) - (1, 1, 1)).Normalize();
-                    var rotatedDirection = new Vector3D(direction.X * Cos(inRadian) - direction.Y * Sin(inRadian),
-                        direction.X * Sin(inRadian) + direction.Y * Cos(inRadian), direction.Z);
-                    yield return Line.FromPointAndDirection((side.X, side.Y, z), rotatedDirection);
+            foreach (var horizontalJump in horizontalJumps)
+            {
+                var point = pointA + horizontalJump * horizontalDirection;
+                foreach (var verticalJump in verticalJumps)
+                {
+                    var finalPoint = point + verticalJump * verticalDirection;
+                    var direction = RotateVector3D(mainDirection.X, mainDirection.Y, mainDirection.Z, alpha.ToRadian());
+                    yield return Line.FromPointAndDirection(finalPoint, direction);
                 }
             }
-      }
+        }
 
-        private static IEnumerable<Line> SphereStart(double alpha, int xLimit, int yLimit)
+        private static Vector3D RotateVector3D(double x, double y, double z, double degrees)
+        {
+            var rX = x * Cos(degrees) - y * Sin(degrees);
+            var rY = x * Sin(degrees) + y * Cos(degrees);
+            return (rX, rY, z);
+        }
+
+      private static IEnumerable<Line> SphereStart(double alpha, int xLimit, int yLimit)
         {
             var inRadian = alpha.ToRadian();
             var dx = Tan(inRadian);
