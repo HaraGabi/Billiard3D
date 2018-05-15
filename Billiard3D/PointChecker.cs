@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 
 namespace Billiard3D
 {
-    internal struct PointChecker
-    {
+    internal struct PointChecker : IPointChecker
+   {
         private Plane Plane { get; }
         private bool IsPositive { get; }
 

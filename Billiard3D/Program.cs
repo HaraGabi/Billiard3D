@@ -27,42 +27,42 @@ namespace Billiard3D
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
 
-            //NearAutoCorrelation(50);
-            //Kausztika();
-            //ParallelAutoCorrelationSimulation();
-            //VariableStartingPoint();
-            //ParallelSimulation();
-            //VeryLong();
-            //LimesRun();
-            //ParallelStart(0.05);
-            //CylinderCaustic();
+         //NearAutoCorrelation(50);
+         //Kausztika();
+         //ParallelAutoCorrelationSimulation();
+         //VariableStartingPoint();
+         //ParallelSimulation();
+         //VeryLong();
+         //LimesRun();
+         //ParallelStart(0.05);
+         //CylinderCaustic();
 
-            var alpha = new double[] {0, 45, 89};
-            const int from = 0;
-            const int to = 3;
-            Parallel.For(from, to, i => { OctoSphereCaustic(alpha[i]); });
+         //var alpha = new double[] {0, 45, 89};
+         //const int from = 0;
+         //const int to = 3;
+         //Parallel.For(from, to, i => { OctoSphereCaustic(alpha[i]); });
+
+         
+         var alpha = new double[] { 0, 45, 89 };
+         const int from = 0;
+         const int to = 3;
+         Parallel.For(from, to, i => { CylinderCaustic(alpha[i]); });
 
 
-            //var alpha = new double[] { 0, 45, 89 };
-            //   const int from = 0;
-            //   const int to = 3;
-            //   Parallel.For(from, to, i => { CylinderCaustic(alpha[i]); });
-
-
-            //var alpha = new double[]{ 0, 45, 89 };
-            //const int from = 0;
-            //const int to = 3;
-            //Parallel.For(from, to, i => { SphereCaustic2(alpha[i]); });
-        }
+         //var alpha = new double[]{ 0, 45, 89 };
+         //const int from = 0;
+         //const int to = 3;
+         //Parallel.For(from, to, i => { SphereCaustic2(alpha[i]); });
+      }
 
         private static void CylinderCaustic(double alpha)
         {
-            var startLines = CreateCylinderStartLines(alpha, 500, 100, 4).ToList();
+            var startLines = CreateCylinderStartLines2(alpha, 500, 100).ToList();
             foreach (var startLine in startLines)
             {
                 var causticCylinder = new CausticCylinder(4);
                 var line = causticCylinder.Start(startLine);
-                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICYLINDERMINE", $"PointTableQuarter{alpha}.txt");
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICYLINDER4", $"PointTableQuarter{alpha}.txt");
             }
         }
 
@@ -84,7 +84,7 @@ namespace Billiard3D
             {
                 var sphere2 = new CausticSphere(8);
                 var line = sphere2.Start(startingPoint);
-                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE6", $"PointTableOctave{alpha}.txt");
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE7", $"PointTableOctave{alpha}.txt");
             }
         }
 
@@ -177,7 +177,30 @@ namespace Billiard3D
             }
         }
 
-        private static void LimesRun()
+        private static IEnumerable<Line> CreateCylinderStartLines2(double alpha, int zLimit, int yLimit)
+        {
+            var b = Sqrt(8) / 2;
+            var alpha2 = 90 - alpha;
+            var beta = 180 - 45 - alpha2;
+            var a = 2 - Sin(alpha2.ToRadian()) / Sin(beta.ToRadian()) * b;
+            var r = CausticCylinder.R;
+            var verticalLine = new Line((0, 0, -r), (-r, 0, 0));
+            var distance = Vector3D.AbsoluteValue(verticalLine.SecondPoint - verticalLine.BasePoint);
+            var midpoint = verticalLine.GetPointOnLine(distance / 2);
+            var (xDir, yDir, zDir) = (-1, 0, -1 + a) - midpoint;
+            var zRange = Numpy.LinSpace(0, distance, zLimit).ToList();
+            var yRange = Numpy.LinSpace(0, CausticCylinder.L, yLimit).ToList();
+            foreach (var z in zRange)
+            {
+                foreach (var y in yRange)
+                {
+                    var (x, y2, z2) = verticalLine.GetPointOnLine(z);
+                    yield return Line.FromPointAndDirection((x, y, z2), (xDir, yDir, zDir));
+                }
+            }
+        }
+
+      private static void LimesRun()
         {
             var radii = new[]
                 {50, 100, 150, 200, 250, 300}; //{0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1};

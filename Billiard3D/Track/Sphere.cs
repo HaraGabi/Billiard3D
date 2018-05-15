@@ -16,13 +16,20 @@ namespace Billiard3D.Track
 
         public string BoundaryName { get; set; }
 
-        public PointChecker Checker { get; set; }
+        public IPointChecker Checker { get; set; }
         private const double Confidence = 0.00005;
 
         public Sphere(Vector3D center, double radius)
         {
             Center = center;
             Radius = radius;
+        }
+
+        public Sphere(Vector3D center, double radius, IPointChecker checker)
+        {
+            Center = center;
+            Radius = radius;
+            Checker = checker;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

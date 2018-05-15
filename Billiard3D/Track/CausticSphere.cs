@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Runtime.CompilerServices;
 using Billiard3D.VectorMath;
 
@@ -8,6 +7,7 @@ namespace Billiard3D.Track
     internal class CausticSphere
     {
         public static double R { get; set; } = 1;
+
         // ReSharper disable once MemberCanBePrivate.Global
         public Sphere Sphere { get; }
 
@@ -25,9 +25,9 @@ namespace Billiard3D.Track
         {
             var sphere = new Sphere((1, 1, 1), R);
             var position = 1 / R;
-            var plane = new Plane((position, 0, position), (0, position, position), (position, position, 0));
-            var sign = plane.DeterminePointPosition((0, 0, 0)) > 0 ? +1 : -1;
-            sphere.Checker = new PointChecker(plane, sign);
+            var sphereChecker = new SphereChecker((position, 0, position), (0, position, position),
+                (position, position, 0), (0, 0, 0), (1, 1, 1));
+            sphere.Checker = sphereChecker;
             Sphere = sphere;
         }
 
@@ -36,7 +36,7 @@ namespace Billiard3D.Track
         {
             var intersectionPoints = Sphere.GetIntersectionPoints(in startPoint).ToList();
             if (intersectionPoints.Count > 1) return new Line((-90, -90, -90), (-99, -99, -99));
-         if (intersectionPoints.Count != 1) return new Line((-90, -90, -90), (-99, -99, -99));
+            if (intersectionPoints.Count != 1) return new Line((-90, -90, -90), (-99, -99, -99));
             var intersect = intersectionPoints.Single();
             var line = Sphere.LineAfterHit(in startPoint, in intersect);
             return line;
