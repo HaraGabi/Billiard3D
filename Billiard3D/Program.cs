@@ -37,19 +37,18 @@ namespace Billiard3D
          //ParallelStart(0.05);
          //CylinderCaustic();
 
-         //var alpha = new double[] {0, 45, 89};
-         //const int from = 0;
-         //const int to = 3;
-         //Parallel.For(from, to, i => { OctoSphereCaustic(alpha[i]); });
-
-         
          var alpha = new double[] { 0, 45, 89 };
          const int from = 0;
          const int to = 3;
-         Parallel.For(from, to, i => { CylinderCaustic(alpha[i]); });
+         Parallel.For(from, to, i => { OctoSphereCaustic(alpha[i]); });
+
+         //var alpha = new double[] { 0, 45, 89 };
+         //const int from = 0;
+         //const int to = 3;
+         //Parallel.For(from, to, i => { CylinderCaustic(alpha[i]); });
 
 
-         //var alpha = new double[]{ 0, 45, 89 };
+         //var alpha = new double[] { 0, 45, 89 };
          //const int from = 0;
          //const int to = 3;
          //Parallel.For(from, to, i => { SphereCaustic2(alpha[i]); });
@@ -73,7 +72,7 @@ namespace Billiard3D
             {
                 var sphere2 = new CausticSphere();
                 var line = sphere2.Start(startingPoint);
-                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE5", $"PointTable{alpha}.txt");
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE6", $"PointTable{alpha}.txt");
             }
         }
 
@@ -84,7 +83,7 @@ namespace Billiard3D
             {
                 var sphere2 = new CausticSphere(8);
                 var line = sphere2.Start(startingPoint);
-                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE7", $"PointTableOctave{alpha}.txt");
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE9", $"PointTableOctave{alpha}.txt");
             }
         }
 
@@ -188,8 +187,10 @@ namespace Billiard3D
             var distance = Vector3D.AbsoluteValue(verticalLine.SecondPoint - verticalLine.BasePoint);
             var midpoint = verticalLine.GetPointOnLine(distance / 2);
             var (xDir, yDir, zDir) = (-1, 0, -1 + a) - midpoint;
+
             var zRange = Numpy.LinSpace(0, distance, zLimit).ToList();
             var yRange = Numpy.LinSpace(0, CausticCylinder.L, yLimit).ToList();
+
             foreach (var z in zRange)
             {
                 foreach (var y in yRange)
