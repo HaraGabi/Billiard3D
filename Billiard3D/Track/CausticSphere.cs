@@ -16,8 +16,7 @@ namespace Billiard3D.Track
             var sphere = new Sphere((0, 0, 1), R);
             var plane = new Plane((2, 3, 1), (4, 3, 1), (0, 0, 1));
             var sign = plane.DeterminePointPosition((0, 0, 0)) > 0 ? +1 : -1;
-            var checker = new PointChecker(plane, sign);
-            sphere.Checker = checker;
+            sphere.Checker = new PointChecker(plane, sign);
             Sphere = sphere;
         }
 
@@ -25,9 +24,8 @@ namespace Billiard3D.Track
         {
             var sphere = new Sphere((1, 1, 1), R);
             var position = 1 / R;
-            var sphereChecker = new SphereChecker((position, 0, position), (0, position, position),
+            sphere.Checker = new SphereChecker((position, 0, position), (0, position, position),
                 (position, position, 0), (0, 0, 0), (1, 1, 1));
-            sphere.Checker = sphereChecker;
             Sphere = sphere;
         }
 
@@ -35,8 +33,8 @@ namespace Billiard3D.Track
         public Line Start(Line startPoint)
         {
             var intersectionPoints = Sphere.GetIntersectionPoints(in startPoint).ToList();
-            if (intersectionPoints.Count > 1) return new Line((-90, -90, -90), (-99, -99, -99));
-            if (intersectionPoints.Count != 1) return new Line((-90, -90, -90), (-99, -99, -99));
+            if (intersectionPoints.Count > 1) return Line.GetInvalid();
+            if (intersectionPoints.Count != 1) return Line.GetInvalid();
             var intersect = intersectionPoints.Single();
             var line = Sphere.LineAfterHit(in startPoint, in intersect);
             return line;

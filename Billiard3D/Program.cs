@@ -27,32 +27,34 @@ namespace Billiard3D
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
 
-         //NearAutoCorrelation(50);
-         //Kausztika();
-         //ParallelAutoCorrelationSimulation();
-         //VariableStartingPoint();
-         //ParallelSimulation();
-         //VeryLong();
-         //LimesRun();
-         //ParallelStart(0.05);
-         //CylinderCaustic();
+            //NearAutoCorrelation(50);
+            //Kausztika();
+            //ParallelAutoCorrelationSimulation();
+            //VariableStartingPoint();
+            //ParallelSimulation();
+            //VeryLong();
+            //LimesRun();
+            //ParallelStart(0.05);
+            //CylinderCaustic();
 
-         var alpha = new double[] { 0, 45, 89 };
-         const int from = 0;
-         const int to = 3;
-         Parallel.For(from, to, i => { OctoSphereCaustic(alpha[i]); });
+            TriangleSphere();
 
-         //var alpha = new double[] { 0, 45, 89 };
-         //const int from = 0;
-         //const int to = 3;
-         //Parallel.For(from, to, i => { CylinderCaustic(alpha[i]); });
+            var alpha = new double[] { 0, 45, 89 };
+            const int from = 0;
+            const int to = 3;
+            Parallel.For(from, to, i => OctoSphereCaustic(alpha[i]));
+
+            //var alpha = new double[] { 0, 45, 89 };
+            //const int from = 0;
+            //const int to = 3;
+            //Parallel.For(from, to, i => { CylinderCaustic(alpha[i]); });
 
 
-         //var alpha = new double[] { 0, 45, 89 };
-         //const int from = 0;
-         //const int to = 3;
-         //Parallel.For(from, to, i => { SphereCaustic2(alpha[i]); });
-      }
+            //var alpha = new double[] { 0, 45, 89 };
+            //const int from = 0;
+            //const int to = 3;
+            //Parallel.For(from, to, i => { SphereCaustic2(alpha[i]); });
+        }
 
         private static void CylinderCaustic(double alpha)
         {
@@ -68,51 +70,167 @@ namespace Billiard3D
         private static void SphereCaustic2(double alpha)
         {
             var startingPoints = SphereStart(alpha, 500, 500);
+            var list = new ConcurrentBag<Line>();
             foreach (var startingPoint in startingPoints)
             {
                 var sphere2 = new CausticSphere();
                 var line = sphere2.Start(startingPoint);
+                list.Add(line);
+            }
+            foreach (Line line in list)
+            {
                 Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE6", $"PointTable{alpha}.txt");
+            }
+        }
+
+        private static void TriangleSphere()
+        {
+            var startingPoints = OctoSphereTri().ToList();
+            var list = new ConcurrentBag<Line>();
+            foreach (var startingPoint in startingPoints)
+            {
+                var sphere2 = new CausticSphere(8);
+                var line = sphere2.Start(startingPoint);
+                list.Add(line);
+            }
+            foreach (Line line in list)
+            {
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERETriangle4", $"PointTableOctave.txt");
             }
         }
 
         private static void OctoSphereCaustic(double alpha)
         {
             var startingPoints = OctoSphereStart(alpha, 500, 500).ToList();
+            var list = new ConcurrentBag<Line>();
             foreach (var startingPoint in startingPoints)
             {
                 var sphere2 = new CausticSphere(8);
                 var line = sphere2.Start(startingPoint);
-                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE9", $"PointTableOctave{alpha}.txt");
+                list.Add(line);
+            }
+            foreach (Line line in list)
+            {
+                Writer(line, @"C:\Workspaces\etc\szakdoga\CAUSTICSPHERE12", $"PointTableOctave{alpha}.txt");
+            }
+        }
+
+        private static double Heron(double a, double b, double c)
+        {
+            var s = (a + b + c) / 2;
+            return Sqrt(s * (s - a) * (s - b) * (s - c));
+        }
+
+        private static IEnumerable<Line> OctoSphereTri()
+        {
+            const double alpha = 0.0;
+            var xPoint = new Vector3D(2, 0, 0);
+            var yPoint = new Vector3D(0, 2, 0);
+            var topPoint = new Vector3D(0, 0, 2);
+
+            var side1 = Vector3D.AbsoluteValue(yPoint - xPoint);
+            var side2 = Vector3D.AbsoluteValue(topPoint - xPoint);
+            var side3 = Vector3D.AbsoluteValue(topPoint - yPoint);
+            var bigT = Heron(side1, side2, side3);
+
+            var distance = Vector3D.AbsoluteValue(yPoint - xPoint);
+            var bottomLine = new Line(xPoint, yPoint);
+            var bottomPoint = bottomLine.GetPointOnLine(distance / 2);
+            var verticalDistance = Vector3D.AbsoluteValue(bottomPoint - topPoint);
+
+            var horizontalDirection = (yPoint - xPoint).Normalize();
+            var verticalDirection = (topPoint - bottomPoint).Normalize();
+            var mainDirection = -1 * (new Plane(xPoint, yPoint, topPoint).NormalVector);
+
+            var horizontalJumps = Numpy.LinSpace(0, distance, 500);
+            var verticalJumps = Numpy.LinSpace(0, verticalDistance, 500);
+
+            foreach (var horizontalJump in horizontalJumps)
+            {
+                var horiPoint = xPoint + (horizontalJump * horizontalDirection);
+                foreach (var verticalJump in verticalJumps)
+                {
+                    var finalPoint = horiPoint + (verticalJump * verticalDirection);
+                    var dist1 = Vector3D.AbsoluteValue(finalPoint - xPoint);
+                    var dist2 = Vector3D.AbsoluteValue(finalPoint - yPoint);
+                    var dist3 = Vector3D.AbsoluteValue(finalPoint - topPoint);
+
+                    var T1 = Heron(side1, dist1, dist2);
+                    var T2 = Heron(side2, dist1, dist3);
+                    var T3 = Heron(side3, dist2, dist3);
+                    var T = T1 + T2 + T3;
+
+                    var difference = Abs(bigT - T);
+                    if (difference >= 0e-5)
+                    {
+                        yield return Line.GetInvalid();
+                    }
+                    else
+                    {
+                        var direction = RotateVector3D(mainDirection.X, mainDirection.Y, mainDirection.Z, alpha.ToRadian());
+                        yield return Line.FromPointAndDirection(finalPoint, direction);
+                    }
+
+                }
             }
         }
 
         private static IEnumerable<Line> OctoSphereStart(double alpha, int xLimit, int yLimit)
         {
+            var xPoint = new Vector3D(2, 0, 0);
+            var yPoint = new Vector3D(0, 2, 0);
+            var topPoint = new Vector3D(0, 0, 2);
+
+            var distance = Vector3D.AbsoluteValue(yPoint - xPoint);
+            var bottomLine = new Line(xPoint, yPoint);
+            var bottomPoint = bottomLine.GetPointOnLine(distance / 2);
+            var verticalDistance = Vector3D.AbsoluteValue(bottomPoint - topPoint);
+
+            var horizontalDirection = (yPoint - xPoint).Normalize();
+            var verticalDirection = (topPoint - bottomPoint).Normalize();
+            var mainDirection = -1 * (new Plane(xPoint, yPoint, topPoint).NormalVector);
+
+            var horizontalJumps = Numpy.LinSpace(0, distance, xLimit);
+            var verticalJumps = Numpy.LinSpace(0, verticalDistance, yLimit);
+
+            foreach (var horizontalJump in horizontalJumps)
+            {
+                var horiPoint = xPoint + (horizontalJump * horizontalDirection);
+                foreach (var verticalJump in verticalJumps)
+                {
+                    var finalPoint = horiPoint + (verticalJump * verticalDirection);
+                    var direction = RotateVector3D(mainDirection.X, mainDirection.Y, mainDirection.Z, alpha.ToRadian());
+                    yield return Line.FromPointAndDirection(finalPoint, direction);
+                }
+            }
+        }
+
+        private static IEnumerable<Line> OctoSphereStartOLD(double alpha, int xLimit, int yLimit)
+        {
             var origin = new Vector3D(0, 0, 0);
             var planePoint = new Vector3D(1, 1, 0);
-            var pointA = new Vector3D(2, 0, 2);
-            var pointB = new Vector3D(0, 2, 2);
+            var pointA = new Vector3D(2, 0, 0);
+            var pointB = new Vector3D(0, 2, 0);
             var distanceFromOriginAtTheBase = Vector3D.AbsoluteValue(planePoint - origin);
             var distanceFromOriginAtTheBaseOnTheXAxis = distanceFromOriginAtTheBase / Sin(45.0.ToRadian());
             var pointOnXAxisOnTheBase = new Vector3D(distanceFromOriginAtTheBaseOnTheXAxis, 0.0, 0.0);
-            var horizontalDistanceAtTop = Vector3D.AbsoluteValue(pointB - pointA);
+            var horizontalDistanceAtTop = Sqrt(8);
             var halfDistanceAtTop = horizontalDistanceAtTop / 2;
             var horizontalDirection = (planePoint - pointOnXAxisOnTheBase).Normalize();
-            var halfPoint = pointA + halfDistanceAtTop *
-                            horizontalDirection;
+            var halfPoint = (0, 0, 2);
             var verticalDistance = Vector3D.AbsoluteValue(planePoint - halfPoint);
             var verticalDirection = (planePoint - halfPoint).Normalize();
             var horizontalJumps = Numpy.LinSpace(0, horizontalDistanceAtTop, xLimit).ToList();
             var verticalJumps = Numpy.LinSpace(0, verticalDistance, yLimit).ToList();
-            var mainDirection = origin - (1, 1, 1);
+            var midPoint = (pointA + (horizontalJumps[xLimit / 2] * horizontalDirection)) + (verticalJumps[yLimit / 2] * verticalDirection);
+            var mainDirection = origin - midPoint;
 
             foreach (var horizontalJump in horizontalJumps)
             {
-                var point = pointA + horizontalJump * horizontalDirection;
+                var point = pointA + (horizontalJump * horizontalDirection);
                 foreach (var verticalJump in verticalJumps)
                 {
-                    var finalPoint = point + verticalJump * verticalDirection;
+                    var finalPoint = point + (verticalJump * verticalDirection);
                     var direction = RotateVector3D(mainDirection.X, mainDirection.Y, mainDirection.Z, alpha.ToRadian());
                     yield return Line.FromPointAndDirection(finalPoint, direction);
                 }

@@ -45,8 +45,8 @@ namespace Billiard3D.Track
         {
             var linePoint = line.BasePoint;
             var lineDir = line.Direction;
-            var discriminant = Pow(lineDir * (line.BasePoint - Center), 2) -
-                               Pow(Vector3D.AbsoluteValue(line.BasePoint - Center), 2) + Pow(Radius, 2);
+            var discriminant = Pow(lineDir * (line.BasePoint - Center), 2)
+                               - Pow(Vector3D.AbsoluteValue(line.BasePoint - Center), 2) + Pow(Radius, 2);
             if (discriminant < 0)
                 return Enumerable.Empty<Vector3D>();
             var plus = -(lineDir * (line.BasePoint - Center)) + Sqrt(discriminant);
@@ -54,13 +54,13 @@ namespace Billiard3D.Track
             if (discriminant < Confidence)
             {
                 var result = plus > 0
-                    ? new List<Vector3D> {line.BasePoint + plus * line.Direction}.Where(Checker.IsPointOnTheCorrectSide)
+                    ? new List<Vector3D> {line.BasePoint + (plus * line.Direction) }.Where(Checker.IsPointOnTheCorrectSide)
                     : Enumerable.Empty<Vector3D>();
                 return result;
             }
 
             var equationResults = new List<double> {plus, minus}.Where(x => x > Confidence);
-            var results = equationResults.Select(x => linePoint + x * lineDir);
+            var results = equationResults.Select(x => linePoint + (x * lineDir));
             return results.Where(Checker.IsPointOnTheCorrectSide);
         }
 
@@ -71,8 +71,8 @@ namespace Billiard3D.Track
             var line = new Line(Center, hitPoint);
             var normalVector = -1 * line.Direction.Normalize();
 
-            var newDirection = 2 * (-1 * incoming.Direction.Normalize() * normalVector) * normalVector +
-                               incoming.Direction.Normalize();
+            var newDirection = (2 * (-1 * incoming.Direction.Normalize() * normalVector) * normalVector)
+                               + incoming.Direction.Normalize();
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 

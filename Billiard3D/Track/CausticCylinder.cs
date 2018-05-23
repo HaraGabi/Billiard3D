@@ -31,8 +31,8 @@ namespace Billiard3D.Track
         public Line Start(Line startPoint)
         {
             var intersectionPoints = Cylinder.GetIntersectionPoints(in startPoint).ToList();
-            if (intersectionPoints.Count > 1) return new Line((-90, -90, -90), (-99, -99, -99));
-            if (intersectionPoints.Count == 0) return new Line((-90, -90, -90), (-99, -99, -99));
+            if (intersectionPoints.Count > 1) return Line.GetInvalid();
+            if (intersectionPoints.Count == 0) return Line.GetInvalid();
             var intersect = intersectionPoints.Single();
             var line = Cylinder.LineAfterHit(in startPoint, in intersect);
             return line;

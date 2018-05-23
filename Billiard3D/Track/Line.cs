@@ -25,6 +25,8 @@ namespace Billiard3D.Track
             yield return SecondPoint;
         }
 
+        public static Line GetInvalid() => new Line((double.NaN, double.NaN, double.NaN), (double.NaN, double.NaN, double.NaN));
+
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

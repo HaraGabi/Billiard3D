@@ -42,20 +42,18 @@ namespace Billiard3D.Track
         public IEnumerable<Vector3D> GetIntersectionPoints(in Line line)
         {
             if (Math.Abs(line.Direction * NormalVector) < Confidence) return Enumerable.Empty<Vector3D>();
-            var distance = (Corners.First() - line.BasePoint) * NormalVector / (line.Direction * NormalVector);
+            var distance = (Corners[0] - line.BasePoint) * NormalVector / (line.Direction * NormalVector);
             if (distance < Confidence) return Enumerable.Empty<Vector3D>();
-            var hitPoint = new List<Vector3D> {line.BasePoint + distance * line.Direction};
-            hitPoint = hitPoint.Where(OnTheWall).ToList();
-
-            return hitPoint;
+            var hitPoint = new List<Vector3D> {line.BasePoint + (distance * line.Direction) };
+            return hitPoint.Where(OnTheWall).ToList();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Line LineAfterHit(in Line incoming, in Vector3D hitPoint)
         {
             HitPoints.Add(hitPoint);
-            var newDirection = 2 * (-1 * incoming.Direction * NormalVector) * NormalVector +
-                               incoming.Direction;
+            var newDirection = (2 * (-1 * incoming.Direction * NormalVector) * NormalVector)
+                               + incoming.Direction;
             return Line.FromPointAndDirection(hitPoint, newDirection);
         }
 
@@ -85,8 +83,7 @@ namespace Billiard3D.Track
             var forY = smallerThanMaxY && biggerThanMinY;
             var forZ = smallerThanMaxZ && biggerThanMinZ;
 
-            var inBetween = forX && forY && forZ;
-            return inBetween;
+            return forX && forY && forZ;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
